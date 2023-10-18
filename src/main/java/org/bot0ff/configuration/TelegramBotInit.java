@@ -1,5 +1,6 @@
 package org.bot0ff.configuration;
 
+import lombok.extern.log4j.Log4j;
 import org.bot0ff.component.TelegramBot;
 import lombok.RequiredArgsConstructor;
 import org.apache.log4j.Logger;
@@ -11,11 +12,11 @@ import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
+@Log4j
 @Component
 @RequiredArgsConstructor
 public class TelegramBotInit {
     private final TelegramBot telegramBot;
-    private static final Logger log = Logger.getLogger(TelegramBotInit.class);
 
     @EventListener(ApplicationReadyEvent.class)
     public void init() {

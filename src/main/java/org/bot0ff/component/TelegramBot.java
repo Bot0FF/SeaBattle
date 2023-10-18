@@ -1,20 +1,33 @@
 package org.bot0ff.component;
 
-import org.apache.log4j.Logger;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j;
+import org.bot0ff.controller.UpdateController;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import javax.annotation.PostConstruct;
+
+@Log4j
 @Component
 @PropertySource("application.properties")
+@RequiredArgsConstructor
 public class TelegramBot extends TelegramLongPollingBot {
-    private static final Logger log = Logger.getLogger(TelegramBot.class);
     @Value("${bot.name}")
     private String botName;
     @Value("${bot.token}")
     private String botToken;
+    private final UpdateController updateController;
+
+    @PostConstruct
+    private void init() {
+        updateController.registerBot(this);
+    }
 
     @Override
     public String getBotUsername() {
@@ -28,7 +41,16 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        var message = update.getMessage();
-        System.out.println(message.getText());
+        updateController.processUpdate(update);
+    }
+
+    public void sendTextMessage(SendMessage sendMessage) {
+        if(sendMessage != null) {
+            try {
+                execute(sendMessage);
+            } catch (TelegramApiException e) {
+                log.error(e);
+            }
+        }
     }
 }
