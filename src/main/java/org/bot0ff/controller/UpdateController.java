@@ -3,10 +3,7 @@ package org.bot0ff.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j;
 import org.bot0ff.component.TelegramBot;
-import org.bot0ff.kafka.UpdateProducer;
-import org.bot0ff.utils.MessageUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Lazy;
+import org.bot0ff.service.MainService;
 import org.springframework.stereotype.Controller;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -16,10 +13,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 @RequiredArgsConstructor
 public class UpdateController {
     private TelegramBot telegramBot;
-    private final MessageUtils messageUtils;
-    private final UpdateProducer updateProducer;
-    @Value("${kafka.producer.message.incoming}")
-    private String incomingMessageFromTelegram;
+    private final MainService mainService;
 
     public void registerBot(TelegramBot telegramBot) {
         this.telegramBot = telegramBot;
@@ -32,10 +26,10 @@ public class UpdateController {
         }
 
         if(update.getMessage() != null) {
-            processTextMessage(update);
+            processTextMessage(telegramBot, update);
         }
         else if(update.getCallbackQuery() != null) {
-            processCallbackQuery(update);
+            processCallbackQuery(telegramBot, update);
         }
         else {
             setUnsupportedMessageType(update);
@@ -43,21 +37,23 @@ public class UpdateController {
         }
     }
 
-    private void processTextMessage(Update update) {
-        updateProducer.produce(incomingMessageFromTelegram, update);
+    private void processTextMessage(TelegramBot telegramBot, Update update) {
+        mainService.processTextMessage(telegramBot, update);
     }
 
-    private void processCallbackQuery(Update update) {
-        updateProducer.produce(incomingMessageFromTelegram, update);
+    private void processCallbackQuery(TelegramBot telegramBot, Update update) {
+        mainService.processCallbackQuery(telegramBot, update);
     }
 
     private void setUnsupportedMessageType(Update update) {
-        var sendMessage = messageUtils.generateSendMessage(update,
-                "Неподдерживаемый тип сообщений");
+        var message = update.getMessage();
+        var sendMessage = new SendMessage();
+        sendMessage.setChatId(message.getChatId().toString());
+        sendMessage.setText("Неподдерживаемый тип сообщений");
         setView(sendMessage);
     }
 
-    private void setView(SendMessage sendMessage) {
+    public void setView(SendMessage sendMessage) {
         telegramBot.sendTextMessage(sendMessage);
     }
 
