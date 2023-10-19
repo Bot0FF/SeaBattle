@@ -19,57 +19,66 @@ import static org.bot0ff.service.ServiceCommands.*;
 @RequiredArgsConstructor
 public class MainServiceImpl implements MainService{
     private final UserService userService;
+    private final SearchGameService searchGameService;
 
     @Override
     public void processTextMessage(TelegramBot telegramBot, Update update) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(update.getMessage().getChatId());
-        ResponseDto response;
 
         var user = userService.findOrSaveUser(update);
         var userState = user.getState();
         var inputMessage = update.getMessage().getText();
 
         if(WAIT_REGISTRATION.equals(userState)) {
-            response = ResponseDto.builder()
+            var answer = processRegistration(user, inputMessage, sendMessage);
+            var response = ResponseDto.builder()
                     .telegramBot(telegramBot)
-                    .sendMessage(processRegistration(user, inputMessage, sendMessage))
+                    .sendMessage(answer)
                     .build();
+            telegramBot.sendAnswer(response);
         }
         else if(ONLINE.equals(userState)) {
-            response = ResponseDto.builder()
+            var answer = processServiceCommand(user, inputMessage, sendMessage);
+            var response = ResponseDto.builder()
                     .telegramBot(telegramBot)
-                    .sendMessage(processServiceCommand(user, inputMessage, sendMessage))
+                    .sendMessage(answer)
                     .build();
+            telegramBot.sendAnswer(response);
         }
-        else if(WAIT_FOR_GAME.equals(userState)) {
-            response = ResponseDto.builder()
+        else if(SEARCH_GAME.equals(userState)) {
+            var answer = getInfo("Идет подготовка сражения...", sendMessage);
+            var response = ResponseDto.builder()
                     .telegramBot(telegramBot)
-                    .sendMessage(processSearchGame(user, inputMessage, sendMessage))
+                    .sendMessage(answer)
                     .build();
+            telegramBot.sendAnswer(response);
         }
         else if(PREPARE_GAME.equals(userState)) {
-            response = ResponseDto.builder()
+            var answer = processPrepareGame(user, inputMessage, sendMessage);
+                    var response = ResponseDto.builder()
                     .telegramBot(telegramBot)
-                    .sendMessage(processPrepareGame(user, inputMessage, sendMessage))
+                    .sendMessage(answer)
                     .build();
+            telegramBot.sendAnswer(response);
         }
         else if(IN_GAME.equals(userState)) {
-            response = ResponseDto.builder()
+            var answer = processGame(user, inputMessage, sendMessage);
+            var response = ResponseDto.builder()
                     .telegramBot(telegramBot)
-                    .sendMessage(processGame(user, inputMessage, sendMessage))
+                    .sendMessage(answer)
                     .build();
+            telegramBot.sendAnswer(response);
         }
         else {
             log.error("Unknown user state: " + userState);
-            sendMessage.setText("Неизвестная ошибка! Введите /cancel и попробуйте снова!");
-            response = ResponseDto.builder()
+            var answer = getInfo("Неизвестная ошибка! Введите /cancel и попробуйте снова!", sendMessage);
+            var response = ResponseDto.builder()
                     .telegramBot(telegramBot)
-                    .sendMessage(sendMessage)
+                    .sendMessage(answer)
                     .build();
+            telegramBot.sendAnswer(response);
         }
-
-        telegramBot.sendAnswer(response);
     }
 
     @Override
@@ -83,22 +92,32 @@ public class MainServiceImpl implements MainService{
         answerCallbackQuery.setCallbackQueryId(update.getCallbackQuery().getId());
 
         if(WAIT_REGISTRATION.equals(userState)) {
+            var answer = processRegistrationAuto(user, sendMessage);
             var response = ResponseDto.builder()
                     .telegramBot(telegramBot)
-                    .sendMessage(processRegistrationAuto(user, sendMessage))
+                    .sendMessage(answer)
                     .answerCallbackQuery(answerCallbackQuery)
                     .build();
             telegramBot.sendAnswer(response);
         }
-
-    }
-
-    //отмена активной игры, возврат к базовому состоянию
-    private SendMessage cancelProcess(User user, SendMessage sendMessage) {
-        user.setState(ONLINE);
-        userService.saveUser(user);
-        sendMessage.setText("Игра отменена, Вы потерпели поражение");
-        return sendMessage;
+        else if(ONLINE.equals(userState)) {
+            var answer = searchGameService.searchGame(user, sendMessage, inputMessage);
+            var response = ResponseDto.builder()
+                    .telegramBot(telegramBot)
+                    .sendMessage(answer)
+                    .answerCallbackQuery(answerCallbackQuery)
+                    .build();
+            telegramBot.sendAnswer(response);
+        }
+        else if(SEARCH_GAME.equals(userState)) {
+            var answer = getInfo("Идет подготовка сражения...", sendMessage);
+            var response = ResponseDto.builder()
+                    .telegramBot(telegramBot)
+                    .sendMessage(sendMessage)
+                    .answerCallbackQuery(answerCallbackQuery)
+                    .build();
+            telegramBot.sendAnswer(response);
+        }
     }
 
     //ожидание выбора имени
@@ -126,7 +145,8 @@ public class MainServiceImpl implements MainService{
             user.setName(cmd);
             user.setState(ONLINE);
             userService.saveUser(user);
-            sendMessage.setText("Для начала игры выберите \"Поиск игры\"");
+            sendMessage.setText("Выберите противника");
+            sendMessage.setReplyMarkup(InlineButton.startNewGameButton());
         }
         return sendMessage;
     }
@@ -136,19 +156,14 @@ public class MainServiceImpl implements MainService{
         user.setName(user.getName());
         user.setState(ONLINE);
         userService.saveUser(user);
-        sendMessage.setText("Для начала игры выберите \"Поиск игры\"");
+        sendMessage.setText("Выберите противника");
+        sendMessage.setReplyMarkup(InlineButton.startNewGameButton());
         return sendMessage;
     }
 
     //ожидание ввода сервисных команд
     private SendMessage processServiceCommand(User user, String cmd, SendMessage sendMessage) {
         sendMessage.setText("Введите команду из меню");
-        return sendMessage;
-    }
-
-    //процесс поиска игры
-    private SendMessage processSearchGame(User user, String cmd, SendMessage sendMessage) {
-        sendMessage.setText("Поиск игры");
         return sendMessage;
     }
 
@@ -161,6 +176,11 @@ public class MainServiceImpl implements MainService{
     //процесс игры
     private SendMessage processGame(User user, String cmd, SendMessage sendMessage) {
         sendMessage.setText("В игре");
+        return sendMessage;
+    }
+
+    private SendMessage getInfo(String msg, SendMessage sendMessage) {
+        sendMessage.setText(msg);
         return sendMessage;
     }
 }

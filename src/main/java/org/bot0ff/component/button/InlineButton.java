@@ -25,6 +25,23 @@ public class InlineButton {
         return markupInline;
     }
 
+    //начать поиск противника
+    public static InlineKeyboardMarkup startNewGameButton() {
+        List<InlineKeyboardButton> newGameVsAI = new ArrayList<>();
+        List<InlineKeyboardButton> newGameVsUser = new ArrayList<>();
+
+        newGameVsAI.add(new InlineKeyboardButton("Начать игру с ИИ"));
+        newGameVsAI.get(0).setCallbackData("/newGameVsAI");
+        newGameVsUser.add(new InlineKeyboardButton("Найти противника"));
+        newGameVsUser.get(0).setCallbackData("/newGameVsUser");
+
+        List<List<InlineKeyboardButton>> rowsInLine = List.of(newGameVsAI, newGameVsUser);
+        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+        markupInline.setKeyboard(rowsInLine);
+
+        return markupInline;
+    }
+
 //    //список вещей user для ремонта
 //    public static InlineKeyboardMarkup buttonListThingForRepair(List<UserThing> userThings, User user) {
 //        List<List<InlineKeyboardButton>> listButton = new ArrayList<>();
