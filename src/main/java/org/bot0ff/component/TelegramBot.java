@@ -2,13 +2,16 @@ package org.bot0ff.component;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j;
+import org.bot0ff.component.button.TextButton;
 import org.bot0ff.controller.UpdateController;
+import org.bot0ff.dto.ResponseDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import javax.annotation.PostConstruct;
@@ -27,6 +30,11 @@ public class TelegramBot extends TelegramLongPollingBot {
     @PostConstruct
     private void init() {
         updateController.registerBot(this);
+        try {
+            this.execute(new SetMyCommands(TextButton.commandMarkup(), new BotCommandScopeDefault(), null));
+        } catch (TelegramApiException e) {
+            log.error(e.getMessage());
+        }
     }
 
     @Override
@@ -44,13 +52,23 @@ public class TelegramBot extends TelegramLongPollingBot {
         updateController.processUpdate(update);
     }
 
-    public void sendTextMessage(SendMessage sendMessage) {
-        if(sendMessage != null) {
-            try {
-                execute(sendMessage);
-            } catch (TelegramApiException e) {
-                log.error(e);
+    public void sendAnswer(ResponseDto responseDto) {
+        try {
+            execute(responseDto.getSendMessage());
+            if(responseDto.getAnswerCallbackQuery() != null) {
+                execute(responseDto.getAnswerCallbackQuery());
             }
+        } catch (TelegramApiException e) {
+            log.error(e);
         }
+
     }
+//
+//    public void sendAnswerCallbackQuery(AnswerCallbackQuery answerCallbackQuery) {
+//        try {
+//            execute(answerCallbackQuery);
+//        } catch (TelegramApiException e) {
+//            e.printStackTrace();
+//        }
+//    }
 }

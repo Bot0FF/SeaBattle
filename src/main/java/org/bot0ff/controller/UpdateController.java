@@ -3,6 +3,7 @@ package org.bot0ff.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j;
 import org.bot0ff.component.TelegramBot;
+import org.bot0ff.dto.ResponseDto;
 import org.bot0ff.service.MainService;
 import org.springframework.stereotype.Controller;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -39,10 +40,12 @@ public class UpdateController {
 
     private void processTextMessage(TelegramBot telegramBot, Update update) {
         mainService.processTextMessage(telegramBot, update);
+        System.out.println(update.getMessage().getText());
     }
 
     private void processCallbackQuery(TelegramBot telegramBot, Update update) {
         mainService.processCallbackQuery(telegramBot, update);
+        System.out.println(update.getCallbackQuery().getData());
     }
 
     private void setUnsupportedMessageType(Update update) {
@@ -50,11 +53,10 @@ public class UpdateController {
         var sendMessage = new SendMessage();
         sendMessage.setChatId(message.getChatId().toString());
         sendMessage.setText("Неподдерживаемый тип сообщений");
-        setView(sendMessage);
+        var response = ResponseDto.builder()
+                        .telegramBot(telegramBot)
+                        .sendMessage(sendMessage)
+                        .build();
+        telegramBot.sendAnswer(response);
     }
-
-    public void setView(SendMessage sendMessage) {
-        telegramBot.sendTextMessage(sendMessage);
-    }
-
 }

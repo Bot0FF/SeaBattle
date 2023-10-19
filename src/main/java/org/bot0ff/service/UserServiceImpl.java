@@ -17,7 +17,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User findOrSaveUser(Update update) {
-        org.telegram.telegrambots.meta.api.objects.User telegramUser = update.getMessage().getFrom();
+        org.telegram.telegrambots.meta.api.objects.User telegramUser = null;
+        if(update.hasMessage()) {
+            telegramUser = update.getMessage().getFrom();
+        }
+        if(update.hasCallbackQuery()) {
+            telegramUser = update.getCallbackQuery().getFrom();
+        }
+
         User persistentUser = userRepository.findById(telegramUser.getId()).orElse(null);
         if(persistentUser == null) {
             User newUser = User.builder()

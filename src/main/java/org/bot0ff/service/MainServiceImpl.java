@@ -3,9 +3,11 @@ package org.bot0ff.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j;
 import org.bot0ff.component.TelegramBot;
-import org.bot0ff.controller.UpdateController;
+import org.bot0ff.component.button.InlineButton;
+import org.bot0ff.dto.ResponseDto;
 import org.bot0ff.entity.User;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
@@ -20,102 +22,145 @@ public class MainServiceImpl implements MainService{
 
     @Override
     public void processTextMessage(TelegramBot telegramBot, Update update) {
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(update.getMessage().getChatId());
+        ResponseDto response;
+
         var user = userService.findOrSaveUser(update);
         var userState = user.getState();
-        var text = update.getMessage().getText();
-        var answer = "";
+        var inputMessage = update.getMessage().getText();
 
-        //выход из игры, автоматическое поражение, переход в статус ACTIVE
-        if(CANCEL.equals(text)) {
-            answer = cancelProcess(user);
-        }
-        else if(WAIT_REGISTRATION.equals(userState)) {
-            answer = processRegistration(user, text);
+        if(WAIT_REGISTRATION.equals(userState)) {
+            response = ResponseDto.builder()
+                    .telegramBot(telegramBot)
+                    .sendMessage(processRegistration(user, inputMessage, sendMessage))
+                    .build();
         }
         else if(ONLINE.equals(userState)) {
-            answer = processServiceCommand(user);
+            response = ResponseDto.builder()
+                    .telegramBot(telegramBot)
+                    .sendMessage(processServiceCommand(user, inputMessage, sendMessage))
+                    .build();
         }
         else if(WAIT_FOR_GAME.equals(userState)) {
-            answer = processSearchGame(user);
+            response = ResponseDto.builder()
+                    .telegramBot(telegramBot)
+                    .sendMessage(processSearchGame(user, inputMessage, sendMessage))
+                    .build();
         }
         else if(PREPARE_GAME.equals(userState)) {
-            answer = processPrepareGame(user);
+            response = ResponseDto.builder()
+                    .telegramBot(telegramBot)
+                    .sendMessage(processPrepareGame(user, inputMessage, sendMessage))
+                    .build();
         }
         else if(IN_GAME.equals(userState)) {
-            answer = processGame(user);
+            response = ResponseDto.builder()
+                    .telegramBot(telegramBot)
+                    .sendMessage(processGame(user, inputMessage, sendMessage))
+                    .build();
         }
         else {
             log.error("Unknown user state: " + userState);
-            answer = "Неизвестная ошибка! Введите /cancel и попробуйте снова!";
+            sendMessage.setText("Неизвестная ошибка! Введите /cancel и попробуйте снова!");
+            response = ResponseDto.builder()
+                    .telegramBot(telegramBot)
+                    .sendMessage(sendMessage)
+                    .build();
         }
 
-        var chatId = update.getMessage().getChatId();
-        sendAnswer(telegramBot, answer, chatId);
+        telegramBot.sendAnswer(response);
     }
 
     @Override
     public void processCallbackQuery(TelegramBot telegramBot, Update update) {
         var user = userService.findOrSaveUser(update);
         var userState = user.getState();
-        var text = update.getCallbackQuery().getData();
-        var answer = "";
+        var inputMessage = update.getCallbackQuery().getData();
+        var sendMessage = new SendMessage();
+        sendMessage.setChatId(update.getCallbackQuery().getMessage().getChatId());
+        var answerCallbackQuery = new AnswerCallbackQuery();
+        answerCallbackQuery.setCallbackQueryId(update.getCallbackQuery().getId());
 
-        var chatId = update.getCallbackQuery().getId();
-        sendAnswer(telegramBot, answer, Long.valueOf(chatId));
-    }
+        if(WAIT_REGISTRATION.equals(userState)) {
+            var response = ResponseDto.builder()
+                    .telegramBot(telegramBot)
+                    .sendMessage(processRegistrationAuto(user, sendMessage))
+                    .answerCallbackQuery(answerCallbackQuery)
+                    .build();
+            telegramBot.sendAnswer(response);
+        }
 
-
-    private void sendAnswer(TelegramBot telegramBot, String answer, Long chatId) {
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(chatId);
-        sendMessage.setText(answer);
-        telegramBot.sendTextMessage(sendMessage);
     }
 
     //отмена активной игры, возврат к базовому состоянию
-    private String cancelProcess(User user) {
-        return "Добро пожаловать";
+    private SendMessage cancelProcess(User user, SendMessage sendMessage) {
+        user.setState(ONLINE);
+        userService.saveUser(user);
+        sendMessage.setText("Игра отменена, Вы потерпели поражение");
+        return sendMessage;
     }
 
     //ожидание выбора имени
-    private String processRegistration(User user, String cmd) {
+    private SendMessage processRegistration(User user, String cmd, SendMessage sendMessage) {
         if(START.equals(cmd)) {
-            return "Выберете имя или оставьте как есть";
+            sendMessage.setText("""
+                    Добро пожаловать в игру "Морской Бой"!
+                    Это классическая игра, где можно играть с реальными противниками или с ИИ.
+                    Для начала введите желаемое имя и отправьте его или нажмите кнопку "Оставить как есть\"""");
+            sendMessage.setReplyMarkup(InlineButton.registrationButton());
         }
         else if(HELP.equals(cmd)) {
-            return "Внимательно прочтите правила игры";
+            sendMessage.setText("Внимательно прочтите правила игры");
         }
         else if(CANCEL.equals(cmd)) {
-            return "Для продолжения игры необходимо выбрать имя или оставить как есть";
+            sendMessage.setText("Для начала введите желаемое имя и отправьте его или нажмите кнопку \"Оставить как есть\"");
+            sendMessage.setReplyMarkup(InlineButton.registrationButton());
         }
         else if(cmd.length() > 10 | cmd.length() < 3){
-            return "Имя должно быть не больше 10 символов и не меньше 3";
+            sendMessage.setText("Имя должно быть не больше 10 символов и не меньше 3. " +
+                    "Для продолжения введите желаемое имя и отправьте его или нажмите кнопку \"Оставить как есть\"");
+            sendMessage.setReplyMarkup(InlineButton.registrationButton());
         }
         else {
             user.setName(cmd);
             user.setState(ONLINE);
             userService.saveUser(user);
-            return "Для начала игры выберете \"Поиск игры\"";
+            sendMessage.setText("Для начала игры выберите \"Поиск игры\"");
         }
+        return sendMessage;
+    }
+
+    //выбор имени по умолчанию при регистрации
+    private SendMessage processRegistrationAuto(User user, SendMessage sendMessage) {
+        user.setName(user.getName());
+        user.setState(ONLINE);
+        userService.saveUser(user);
+        sendMessage.setText("Для начала игры выберите \"Поиск игры\"");
+        return sendMessage;
     }
 
     //ожидание ввода сервисных команд
-    private String processServiceCommand(User user) {
-        return "Введите команду из меню";
+    private SendMessage processServiceCommand(User user, String cmd, SendMessage sendMessage) {
+        sendMessage.setText("Введите команду из меню");
+        return sendMessage;
     }
 
     //процесс поиска игры
-    private String processSearchGame(User user) {
-        return "Поиск игры";
+    private SendMessage processSearchGame(User user, String cmd, SendMessage sendMessage) {
+        sendMessage.setText("Поиск игры");
+        return sendMessage;
     }
 
     //процесс подготовки игрового поля
-    private String processPrepareGame(User user) {
-        return "Процесс подготовки игрового поля";
+    private SendMessage processPrepareGame(User user, String cmd, SendMessage sendMessage) {
+        sendMessage.setText("Процесс подготовки игрового поля");
+        return sendMessage;
     }
 
     //процесс игры
-    private String processGame(User user) {
-        return "В игре";
+    private SendMessage processGame(User user, String cmd, SendMessage sendMessage) {
+        sendMessage.setText("В игре");
+        return sendMessage;
     }
 }

@@ -1,9 +1,9 @@
 package org.bot0ff.service;
 
 public enum ServiceCommands {
-    HELP("/help"),
+    START("/start"),
     CANCEL("/cancel"),
-    START("/start");
+    HELP("/help");
 
     private final String cmd;
 
