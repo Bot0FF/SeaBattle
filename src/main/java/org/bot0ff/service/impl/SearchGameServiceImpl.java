@@ -9,6 +9,7 @@ import org.bot0ff.service.UserService;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
+import static org.bot0ff.entity.UserState.ONLINE;
 import static org.bot0ff.entity.UserState.SEARCH_GAME;
 
 @Log4j
@@ -18,20 +19,18 @@ public class SearchGameServiceImpl implements SearchGameService {
     private final UserService userService;
 
     @Override
-    public SendMessage searchGame(User user, SendMessage sendMessage, String cmd) {
-        if(cmd.equals("/newGameVsAI")) {
-            user.setState(SEARCH_GAME);
+    public SendMessage stopSearchGame(User user, SendMessage sendMessage, String cmd) {
+        if(cmd.equals("/stopSearchGame")) {
+            user.setState(ONLINE);
             userService.saveUser(user);
-            sendMessage.setText("Подготовка сражения с ИИ...");
-        }
-        else if(cmd.equals("/newGameVsUser")) {
-            user.setState(SEARCH_GAME);
-            userService.saveUser(user);
-            sendMessage.setText("Идет поиск противника...");
+            sendMessage.setText("""
+                    Поиск игры отменен.
+                    Выберите противника для новой игры""");
+            sendMessage.setReplyMarkup(InlineButton.startNewGameButton());
         }
         else {
-            sendMessage.setText("Выберите противника");
-            sendMessage.setReplyMarkup(InlineButton.startNewGameButton());
+            sendMessage.setText("Идет подготовка сражения...");
+            sendMessage.setReplyMarkup(InlineButton.stopSearchGameButton());
         }
         return sendMessage;
     }

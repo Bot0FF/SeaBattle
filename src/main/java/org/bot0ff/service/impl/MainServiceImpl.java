@@ -20,6 +20,7 @@ import static org.bot0ff.entity.UserState.*;
 public class MainServiceImpl implements MainService {
     private final UserService userService;
     private final RegistrationService registrationService;
+    private final ActivityService activityService;
     private final SearchGameService searchGameService;
     private final PrepareGameService prepareGameService;
     private final GameService gameService;
@@ -51,6 +52,7 @@ public class MainServiceImpl implements MainService {
         }
         else if(SEARCH_GAME.equals(userState)) {
             var answer = getInfo("Идет подготовка сражения...", sendMessage);
+            answer.setReplyMarkup(InlineButton.stopSearchGameButton());
             var response = ResponseDto.builder()
                     .telegramBot(telegramBot)
                     .sendMessage(answer)
@@ -104,7 +106,7 @@ public class MainServiceImpl implements MainService {
             telegramBot.sendAnswer(response);
         }
         else if(ONLINE.equals(userState)) {
-            var answer = searchGameService.searchGame(user, sendMessage, inputMessage);
+            var answer = activityService.searchGame(user, sendMessage, inputMessage);
             var response = ResponseDto.builder()
                     .telegramBot(telegramBot)
                     .sendMessage(answer)
@@ -113,10 +115,10 @@ public class MainServiceImpl implements MainService {
             telegramBot.sendAnswer(response);
         }
         else if(SEARCH_GAME.equals(userState)) {
-            var answer = getInfo("Идет подготовка сражения...", sendMessage);
+            var answer = searchGameService.stopSearchGame(user, sendMessage, inputMessage);
             var response = ResponseDto.builder()
                     .telegramBot(telegramBot)
-                    .sendMessage(sendMessage)
+                    .sendMessage(answer)
                     .answerCallbackQuery(answerCallbackQuery)
                     .build();
             telegramBot.sendAnswer(response);
