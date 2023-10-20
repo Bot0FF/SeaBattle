@@ -1,13 +1,14 @@
-package org.bot0ff.service;
+package org.bot0ff.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j;
 import org.bot0ff.component.button.InlineButton;
 import org.bot0ff.entity.User;
+import org.bot0ff.service.SearchGameService;
+import org.bot0ff.service.UserService;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
-import static org.bot0ff.entity.UserState.ONLINE;
 import static org.bot0ff.entity.UserState.SEARCH_GAME;
 
 @Log4j
@@ -24,7 +25,7 @@ public class SearchGameServiceImpl implements SearchGameService {
             sendMessage.setText("Подготовка сражения с ИИ...");
         }
         else if(cmd.equals("/newGameVsUser")) {
-            user.setState(ONLINE);
+            user.setState(SEARCH_GAME);
             userService.saveUser(user);
             sendMessage.setText("Идет поиск противника...");
         }

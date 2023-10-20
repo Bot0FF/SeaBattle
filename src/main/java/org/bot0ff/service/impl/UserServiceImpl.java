@@ -1,10 +1,11 @@
-package org.bot0ff.service;
+package org.bot0ff.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.bot0ff.controller.UpdateController;
 import org.bot0ff.entity.User;
 import org.bot0ff.entity.UserState;
 import org.bot0ff.repository.UserRepository;
+import org.bot0ff.service.UserService;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
