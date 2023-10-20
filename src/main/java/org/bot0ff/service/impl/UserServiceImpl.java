@@ -34,7 +34,7 @@ public class UserServiceImpl implements UserService {
                     .registerDate(LocalDateTime.now())
                     //TODO
                     .state(UserState.WAIT_REGISTRATION)
-                    .isActive(true)
+                    .isSearch(false)
                     .build();
             return userRepository.save(newUser);
         }

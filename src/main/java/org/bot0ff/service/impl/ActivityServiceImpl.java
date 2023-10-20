@@ -4,35 +4,53 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j;
 import org.bot0ff.component.button.InlineButton;
 import org.bot0ff.entity.User;
+import org.bot0ff.service.ActivityService;
 import org.bot0ff.service.UserService;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
-import static org.bot0ff.entity.UserState.SEARCH_GAME;
+import static org.bot0ff.entity.UserState.*;
+import static org.bot0ff.service.ServiceCommands.*;
 
 @Log4j
 @Service
 @RequiredArgsConstructor
-public class ActivityServiceImpl implements ActivityService{
+public class ActivityServiceImpl implements ActivityService {
     private final UserService userService;
 
+    //ответы на текстовые кнопки
     @Override
-    public SendMessage searchGame(User user, SendMessage sendMessage, String cmd) {
-        if(cmd.equals("/newGameVsAI")) {
-            user.setState(SEARCH_GAME);
-            userService.saveUser(user);
-            sendMessage.setText("Подготовка сражения с ИИ...");
-            sendMessage.setReplyMarkup(InlineButton.stopSearchGameButton());
+    public SendMessage changeOptionsFromMenu(User user, SendMessage sendMessage, String cmd) {
+        if(START.equals(cmd)) {
+            sendMessage.setText("Выберите что хотите сделать");
+            sendMessage.setReplyMarkup(InlineButton.changeOptions());
         }
-        else if(cmd.equals("/newGameVsUser")) {
-            user.setState(SEARCH_GAME);
-            userService.saveUser(user);
-            sendMessage.setText("Идет поиск противника...");
-            sendMessage.setReplyMarkup(InlineButton.stopSearchGameButton());
+        else if(CANCEL.equals(cmd)) {
+            sendMessage.setText("Выберите что хотите сделать");
+            sendMessage.setReplyMarkup(InlineButton.changeOptions());
+        }
+        else if(HELP.equals(cmd)) {
+            sendMessage.setText("Помощь");
         }
         else {
-            sendMessage.setText("Выберите противника");
-            sendMessage.setReplyMarkup(InlineButton.startNewGameButton());
+            sendMessage.setText("Выберите что хотите сделать");
+            sendMessage.setReplyMarkup(InlineButton.changeOptions());
+        }
+        return sendMessage;
+    }
+
+    //ответы на inline кнопки
+    @Override
+    public SendMessage changeOptions(User user, SendMessage sendMessage, String cmd) {
+        if(cmd.equals("/newGame")) {
+            user.setState(PREPARE_GAME);
+            userService.saveUser(user);
+            sendMessage.setText("Выберите вариант расстановки кораблей");
+            sendMessage.setReplyMarkup(InlineButton.changePlacementOption());
+        }
+        else {
+            sendMessage.setText("Выберите что хотите сделать");
+            sendMessage.setReplyMarkup(InlineButton.changeOptions());
         }
         return sendMessage;
     }

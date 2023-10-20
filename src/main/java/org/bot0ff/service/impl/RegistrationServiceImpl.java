@@ -18,8 +18,10 @@ import static org.bot0ff.service.ServiceCommands.*;
 public class RegistrationServiceImpl implements RegistrationService {
     private final UserService userService;
 
+    //TODO проверка на существующее имя в бд
+    //регистрация с выбором имени
     @Override
-    public SendMessage processRegistration(User user, String cmd, SendMessage sendMessage) {
+    public SendMessage processRegistration(User user, SendMessage sendMessage, String cmd) {
         if(START.equals(cmd)) {
             sendMessage.setText("""
                     Добро пожаловать в игру "Морской Бой"!
@@ -43,19 +45,27 @@ public class RegistrationServiceImpl implements RegistrationService {
             user.setName(cmd);
             user.setState(ONLINE);
             userService.saveUser(user);
-            sendMessage.setText("Выберите противника");
-            sendMessage.setReplyMarkup(InlineButton.startNewGameButton());
+            sendMessage.setText("Выберите что хотите сделать");
+            sendMessage.setReplyMarkup(InlineButton.changeOptions());
         }
         return sendMessage;
     }
 
+    //TODO проверка на существующее имя в бд
+    //регистрация с выбором имени автоматически
     @Override
-    public SendMessage processRegistrationAuto(User user, SendMessage sendMessage) {
-        user.setName(user.getName());
-        user.setState(ONLINE);
-        userService.saveUser(user);
-        sendMessage.setText("Выберите противника");
-        sendMessage.setReplyMarkup(InlineButton.startNewGameButton());
+    public SendMessage processRegistrationAuto(User user, SendMessage sendMessage, String cmd) {
+        if(cmd.equals("/newUserWithCurrentName")) {
+            user.setName(user.getName());
+            user.setState(ONLINE);
+            userService.saveUser(user);
+            sendMessage.setText("Выберите что хотите сделать");
+            sendMessage.setReplyMarkup(InlineButton.changeOptions());
+        }
+        else {
+            sendMessage.setText("Для начала введите желаемое имя и отправьте его или нажмите кнопку \"Оставить как есть\"");
+            sendMessage.setReplyMarkup(InlineButton.registrationButton());
+        }
         return sendMessage;
     }
 }

@@ -5,7 +5,11 @@ import org.bot0ff.component.TelegramBot;
 import lombok.RequiredArgsConstructor;
 import org.apache.log4j.Logger;
 
+import org.bot0ff.service.ActiveGame;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Scope;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
@@ -26,5 +30,11 @@ public class TelegramBotInit {
         } catch (TelegramApiException e) {
             log.error(e.getMessage());
         }
+    }
+
+    @Bean
+    @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
+    public ActiveGame getActiveGame() {
+        return new ActiveGame();
     }
 }

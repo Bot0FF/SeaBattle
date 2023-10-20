@@ -25,17 +25,73 @@ public class InlineButton {
         return markupInline;
     }
 
-    //начать поиск противника
-    public static InlineKeyboardMarkup startNewGameButton() {
+    //старт новой игры
+    public static InlineKeyboardMarkup changeOptions() {
+        List<InlineKeyboardButton> newGame = new ArrayList<>();
+
+        newGame.add(new InlineKeyboardButton("Начать новую игру"));
+        newGame.get(0).setCallbackData("/newGame");
+
+        List<List<InlineKeyboardButton>> rowsInLine = List.of(newGame);
+        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+        markupInline.setKeyboard(rowsInLine);
+
+        return markupInline;
+    }
+
+    //варианты расстановки кораблей
+    public static InlineKeyboardMarkup changePlacementOption() {
         List<InlineKeyboardButton> newGameVsAI = new ArrayList<>();
         List<InlineKeyboardButton> newGameVsUser = new ArrayList<>();
 
-        newGameVsAI.add(new InlineKeyboardButton("Начать игру с ИИ"));
-        newGameVsAI.get(0).setCallbackData("/newGameVsAI");
-        newGameVsUser.add(new InlineKeyboardButton("Найти противника"));
-        newGameVsUser.get(0).setCallbackData("/newGameVsUser");
+        newGameVsAI.add(new InlineKeyboardButton("Расставить вручную"));
+        newGameVsAI.get(0).setCallbackData("/prepareManually");
+        newGameVsUser.add(new InlineKeyboardButton("Расставить автоматически"));
+        newGameVsUser.get(0).setCallbackData("/prepareAutomatic");
 
         List<List<InlineKeyboardButton>> rowsInLine = List.of(newGameVsAI, newGameVsUser);
+        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+        markupInline.setKeyboard(rowsInLine);
+
+        return markupInline;
+    }
+
+    public static InlineKeyboardMarkup startManuallyPrepare() {
+        List<InlineKeyboardButton> manuallyPrepare = new ArrayList<>();
+
+        manuallyPrepare.add(new InlineKeyboardButton("Начать расстановку"));
+        manuallyPrepare.get(0).setCallbackData("/startManuallyPrepare");
+
+        List<List<InlineKeyboardButton>> rowsInLine = List.of(manuallyPrepare);
+        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+        markupInline.setKeyboard(rowsInLine);
+
+        return markupInline;
+    }
+
+    public static InlineKeyboardMarkup startAutomaticPrepare() {
+        List<InlineKeyboardButton> manuallyPrepare = new ArrayList<>();
+
+        manuallyPrepare.add(new InlineKeyboardButton("Начать расстановку"));
+        manuallyPrepare.get(0).setCallbackData("/startAutomaticPrepare");
+
+        List<List<InlineKeyboardButton>> rowsInLine = List.of(manuallyPrepare);
+        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+        markupInline.setKeyboard(rowsInLine);
+
+        return markupInline;
+    }
+
+    public static InlineKeyboardMarkup confirmAutomaticPrepare() {
+        List<InlineKeyboardButton> confirm = new ArrayList<>();
+        List<InlineKeyboardButton> update = new ArrayList<>();
+
+        confirm.add(new InlineKeyboardButton("Начать поиск противника"));
+        confirm.get(0).setCallbackData("/confirmAutomaticPrepare");
+        update.add(new InlineKeyboardButton("Расставить еще раз"));
+        update.get(0).setCallbackData("/updateAutomaticPrepare");
+
+        List<List<InlineKeyboardButton>> rowsInLine = List.of(confirm, update);
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
         markupInline.setKeyboard(rowsInLine);
 

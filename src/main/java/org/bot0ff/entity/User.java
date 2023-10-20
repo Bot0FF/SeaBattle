@@ -29,6 +29,9 @@ public class User {
     @Enumerated(EnumType.STRING)
     private UserState state;
 
-    @Column(name = "is_active")
-    private boolean isActive;
+    @Transient
+    private boolean isSearch;
+
+    @Transient
+    private Long gameId;
 }

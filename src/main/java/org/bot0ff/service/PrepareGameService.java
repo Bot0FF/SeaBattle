@@ -4,5 +4,6 @@ import org.bot0ff.entity.User;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 public interface PrepareGameService {
-    void prepareGame(User user);
+    SendMessage optionsPrepareGameText(User user, SendMessage sendMessage, String cmd);
+    SendMessage optionsPrepareGameInline(User user, SendMessage sendMessage, String cmd);
 }

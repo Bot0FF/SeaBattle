@@ -5,7 +5,6 @@ import lombok.extern.log4j.Log4j;
 import org.bot0ff.component.TelegramBot;
 import org.bot0ff.component.button.InlineButton;
 import org.bot0ff.dto.ResponseDto;
-import org.bot0ff.entity.User;
 import org.bot0ff.service.*;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
@@ -21,8 +20,10 @@ public class MainServiceImpl implements MainService {
     private final UserService userService;
     private final RegistrationService registrationService;
     private final ActivityService activityService;
-    private final SearchGameService searchGameService;
     private final PrepareGameService prepareGameService;
+    private final PrepareManuallyService prepareManuallyService;
+    private final PrepareAutomaticService prepareAutomaticService;
+    private final SearchGameService searchGameService;
     private final GameService gameService;
 
     @Override
@@ -35,7 +36,7 @@ public class MainServiceImpl implements MainService {
         var inputMessage = update.getMessage().getText();
 
         if(WAIT_REGISTRATION.equals(userState)) {
-            var answer = registrationService.processRegistration(user, inputMessage, sendMessage);
+            var answer = registrationService.processRegistration(user, sendMessage, inputMessage);
             var response = ResponseDto.builder()
                     .telegramBot(telegramBot)
                     .sendMessage(answer)
@@ -43,7 +44,31 @@ public class MainServiceImpl implements MainService {
             telegramBot.sendAnswer(response);
         }
         else if(ONLINE.equals(userState)) {
-            var answer = processServiceCommand(user, inputMessage, sendMessage);
+            var answer = activityService.changeOptionsFromMenu(user, sendMessage, inputMessage);
+            var response = ResponseDto.builder()
+                    .telegramBot(telegramBot)
+                    .sendMessage(answer)
+                    .build();
+            telegramBot.sendAnswer(response);
+        }
+        else if(PREPARE_GAME.equals(userState)) {
+            var answer = prepareGameService.optionsPrepareGameText(user, sendMessage, inputMessage);
+            var response = ResponseDto.builder()
+                    .telegramBot(telegramBot)
+                    .sendMessage(answer)
+                    .build();
+            telegramBot.sendAnswer(response);
+        }
+        else if(PREPARE_MANUALLY.equals(userState)) {
+            var answer = prepareManuallyService.optionsPrepareManuallyText(user, sendMessage, inputMessage);
+            var response = ResponseDto.builder()
+                    .telegramBot(telegramBot)
+                    .sendMessage(answer)
+                    .build();
+            telegramBot.sendAnswer(response);
+        }
+        else if(PREPARE_AUTOMATIC.equals(userState)) {
+            var answer = prepareAutomaticService.optionsPrepareAutomaticText(user, sendMessage, inputMessage);
             var response = ResponseDto.builder()
                     .telegramBot(telegramBot)
                     .sendMessage(answer)
@@ -54,14 +79,6 @@ public class MainServiceImpl implements MainService {
             var answer = getInfo("Идет подготовка сражения...", sendMessage);
             answer.setReplyMarkup(InlineButton.stopSearchGameButton());
             var response = ResponseDto.builder()
-                    .telegramBot(telegramBot)
-                    .sendMessage(answer)
-                    .build();
-            telegramBot.sendAnswer(response);
-        }
-        else if(PREPARE_GAME.equals(userState)) {
-            var answer = getInfo("Идет расстановка кораблей...", sendMessage);
-                    var response = ResponseDto.builder()
                     .telegramBot(telegramBot)
                     .sendMessage(answer)
                     .build();
@@ -97,7 +114,7 @@ public class MainServiceImpl implements MainService {
         answerCallbackQuery.setCallbackQueryId(update.getCallbackQuery().getId());
 
         if(WAIT_REGISTRATION.equals(userState)) {
-            var answer = registrationService.processRegistrationAuto(user, sendMessage);
+            var answer = registrationService.processRegistrationAuto(user, sendMessage, inputMessage);
             var response = ResponseDto.builder()
                     .telegramBot(telegramBot)
                     .sendMessage(answer)
@@ -106,8 +123,35 @@ public class MainServiceImpl implements MainService {
             telegramBot.sendAnswer(response);
         }
         else if(ONLINE.equals(userState)) {
-            var answer = activityService.searchGame(user, sendMessage, inputMessage);
+            var answer = activityService.changeOptions(user, sendMessage, inputMessage);
             var response = ResponseDto.builder()
+                    .telegramBot(telegramBot)
+                    .sendMessage(answer)
+                    .answerCallbackQuery(answerCallbackQuery)
+                    .build();
+            telegramBot.sendAnswer(response);
+        }
+        else if(PREPARE_GAME.equals(userState)) {
+            var answer = prepareGameService.optionsPrepareGameInline(user, sendMessage, inputMessage);
+            var response = ResponseDto.builder()
+                    .telegramBot(telegramBot)
+                    .sendMessage(answer)
+                    .answerCallbackQuery(answerCallbackQuery)
+                    .build();
+            telegramBot.sendAnswer(response);
+        }
+        else if(PREPARE_MANUALLY.equals(userState)) {
+            var answer = prepareManuallyService.prepareGameManuallyInline(user, sendMessage, inputMessage);
+            var response = ResponseDto.builder()
+                    .telegramBot(telegramBot)
+                    .sendMessage(answer)
+                    .answerCallbackQuery(answerCallbackQuery)
+                    .build();
+            telegramBot.sendAnswer(response);
+        }
+        else if(PREPARE_AUTOMATIC.equals(userState)) {
+            var answer = prepareAutomaticService.prepareGameAutomaticInline(user, sendMessage, inputMessage);
+                    var response = ResponseDto.builder()
                     .telegramBot(telegramBot)
                     .sendMessage(answer)
                     .answerCallbackQuery(answerCallbackQuery)
@@ -123,12 +167,6 @@ public class MainServiceImpl implements MainService {
                     .build();
             telegramBot.sendAnswer(response);
         }
-    }
-
-    //ожидание ввода сервисных команд
-    private SendMessage processServiceCommand(User user, String cmd, SendMessage sendMessage) {
-        sendMessage.setText("Введите команду из меню");
-        return sendMessage;
     }
 
     private SendMessage getInfo(String msg, SendMessage sendMessage) {
