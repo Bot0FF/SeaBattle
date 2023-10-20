@@ -21,14 +21,12 @@ public class SearchGameServiceImpl implements SearchGameService {
     @Override
     public SendMessage searchGame(User user, SendMessage sendMessage, String cmd) {
         if(cmd.equals("/newGameVsAI")) {
-            user.setSearch(true);
             user.setState(SEARCH_GAME);
             userService.saveUser(user);
             sendMessage.setText("Подготовка сражения с ИИ...");
             sendMessage.setReplyMarkup(InlineButton.stopSearchGameButton());
         }
         else if(cmd.equals("/newGameVsUser")) {
-            user.setSearch(true);
             user.setState(SEARCH_GAME);
             userService.saveUser(user);
             sendMessage.setText("Идет поиск противника...");
@@ -44,7 +42,6 @@ public class SearchGameServiceImpl implements SearchGameService {
     @Override
     public SendMessage stopSearchGame(User user, SendMessage sendMessage, String cmd) {
         if(cmd.equals("/stopSearchGame")) {
-            user.setSearch(false);
             user.setState(ONLINE);
             userService.saveUser(user);
             sendMessage.setText("""

@@ -12,16 +12,16 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import static org.bot0ff.entity.UserState.ONLINE;
 import static org.bot0ff.service.ServiceCommands.*;
 
+//обрабатывает запросы статуса WAIT_FOR_REGISTRATION
 @Log4j
 @Service
 @RequiredArgsConstructor
 public class RegistrationServiceImpl implements RegistrationService {
     private final UserService userService;
 
-    //TODO проверка на существующее имя в бд
-    //регистрация с выбором имени
+    //ответы на текстовые запросы
     @Override
-    public SendMessage processRegistration(User user, SendMessage sendMessage, String cmd) {
+    public SendMessage processRegistrationText(User user, SendMessage sendMessage, String cmd) {
         if(START.equals(cmd)) {
             sendMessage.setText("""
                     Добро пожаловать в игру "Морской Бой"!
@@ -30,7 +30,7 @@ public class RegistrationServiceImpl implements RegistrationService {
             sendMessage.setReplyMarkup(InlineButton.registrationButton());
         }
         else if(HELP.equals(cmd)) {
-            sendMessage.setText("Внимательно прочтите правила игры");
+            sendMessage.setText("Помощь");
         }
         else if(CANCEL.equals(cmd)) {
             sendMessage.setText("Для начала введите желаемое имя и отправьте его или нажмите кнопку \"Оставить как есть\"");
@@ -51,10 +51,9 @@ public class RegistrationServiceImpl implements RegistrationService {
         return sendMessage;
     }
 
-    //TODO проверка на существующее имя в бд
-    //регистрация с выбором имени автоматически
+    //ответы на inline запросы
     @Override
-    public SendMessage processRegistrationAuto(User user, SendMessage sendMessage, String cmd) {
+    public SendMessage processRegistrationInline(User user, SendMessage sendMessage, String cmd) {
         if(cmd.equals("/newUserWithCurrentName")) {
             user.setName(user.getName());
             user.setState(ONLINE);

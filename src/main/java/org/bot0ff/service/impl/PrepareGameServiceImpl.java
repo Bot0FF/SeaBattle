@@ -12,12 +12,14 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import static org.bot0ff.entity.UserState.*;
 import static org.bot0ff.service.ServiceCommands.*;
 
+//обрабатывает запросы статуса PREPARE_GAME
 @Log4j
 @Service
 @RequiredArgsConstructor
 public class PrepareGameServiceImpl implements PrepareGameService {
     private final UserService userService;
 
+    //ответы на текстовые запросы
     @Override
     public SendMessage optionsPrepareGameText(User user, SendMessage sendMessage, String cmd) {
         if(START.equals(cmd)) {
@@ -42,6 +44,7 @@ public class PrepareGameServiceImpl implements PrepareGameService {
         return sendMessage;
     }
 
+    //ответы на inline запросы
     @Override
     public SendMessage optionsPrepareGameInline(User user, SendMessage sendMessage, String cmd) {
         if(cmd.equals("/prepareManually")) {

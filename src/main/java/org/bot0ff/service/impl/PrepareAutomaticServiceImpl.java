@@ -11,17 +11,23 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 import static org.bot0ff.entity.UserState.ONLINE;
 import static org.bot0ff.entity.UserState.SEARCH_GAME;
-import static org.bot0ff.service.ServiceCommands.CANCEL;
+import static org.bot0ff.service.ServiceCommands.*;
 
+//обрабатывает запросы статуса PREPARE_AUTOMATIC
 @Log4j
 @Service
 @RequiredArgsConstructor
 public class PrepareAutomaticServiceImpl implements PrepareAutomaticService {
     private final UserService userService;
 
+    //ответы на текстовые запросы
     @Override
     public SendMessage optionsPrepareAutomaticText(User user, SendMessage sendMessage, String cmd) {
-        if(CANCEL.equals(cmd)) {
+        if(START.equals(cmd)) {
+            sendMessage.setText("Выбрана автоматическая расстановка кораблей");
+            sendMessage.setReplyMarkup(InlineButton.startAutomaticPrepare());
+        }
+        else if(CANCEL.equals(cmd)) {
             user.setState(ONLINE);
             userService.saveUser(user);
             sendMessage.setText("""
@@ -29,12 +35,17 @@ public class PrepareAutomaticServiceImpl implements PrepareAutomaticService {
                     Выберите что хотите сделать""");
             sendMessage.setReplyMarkup(InlineButton.changeOptions());
         }
+        else if(HELP.equals(cmd)) {
+            sendMessage.setText("Помощь");
+        }
         else {
-            sendMessage.setText("Идет автоматическая расстановка кораблей...");
+            sendMessage.setText("Выбрана автоматическая расстановка кораблей");
+            sendMessage.setReplyMarkup(InlineButton.startAutomaticPrepare());
         }
         return sendMessage;
     }
 
+    //ответы на inline запросы
     @Override
     public SendMessage prepareGameAutomaticInline(User user, SendMessage sendMessage, String cmd) {
         if(cmd.equals("/confirmAutomaticPrepare")) {
@@ -42,12 +53,17 @@ public class PrepareAutomaticServiceImpl implements PrepareAutomaticService {
             userService.saveUser(user);
             sendMessage.setText("Идет поиск противника");
         }
+        else if(cmd.equals("/startAutomaticPrepare")) {
+            sendMessage.setText("Продолжить с текущей расстановкой? \n++++++");
+            sendMessage.setReplyMarkup(InlineButton.confirmAutomaticPrepare());
+        }
         else if(cmd.equals("/updateAutomaticPrepare")) {
-            sendMessage.setText("Сохранить результат расстановки? \n++++++");
+            sendMessage.setText("Продолжить с текущей расстановкой? \n++++++");
             sendMessage.setReplyMarkup(InlineButton.confirmAutomaticPrepare());
         }
         else {
-            sendMessage.setText("Идет автоматическая расстановка кораблей...");
+            sendMessage.setText("Выбрана автоматическая расстановка кораблей");
+            sendMessage.setReplyMarkup(InlineButton.startAutomaticPrepare());
         }
         return sendMessage;
     }

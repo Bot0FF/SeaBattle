@@ -13,6 +13,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 
 import static org.bot0ff.entity.UserState.*;
 
+//перенаправляет запросы в соответствующие сервисы
 @Log4j
 @Service
 @RequiredArgsConstructor
@@ -26,6 +27,7 @@ public class MainServiceImpl implements MainService {
     private final SearchGameService searchGameService;
     private final GameService gameService;
 
+    //перенаправляет текстовые запросы
     @Override
     public void processTextMessage(TelegramBot telegramBot, Update update) {
         SendMessage sendMessage = new SendMessage();
@@ -36,7 +38,7 @@ public class MainServiceImpl implements MainService {
         var inputMessage = update.getMessage().getText();
 
         if(WAIT_REGISTRATION.equals(userState)) {
-            var answer = registrationService.processRegistration(user, sendMessage, inputMessage);
+            var answer = registrationService.processRegistrationText(user, sendMessage, inputMessage);
             var response = ResponseDto.builder()
                     .telegramBot(telegramBot)
                     .sendMessage(answer)
@@ -103,6 +105,7 @@ public class MainServiceImpl implements MainService {
         }
     }
 
+    //перенаправляет inline запросы
     @Override
     public void processCallbackQuery(TelegramBot telegramBot, Update update) {
         var user = userService.findOrSaveUser(update);
@@ -114,7 +117,7 @@ public class MainServiceImpl implements MainService {
         answerCallbackQuery.setCallbackQueryId(update.getCallbackQuery().getId());
 
         if(WAIT_REGISTRATION.equals(userState)) {
-            var answer = registrationService.processRegistrationAuto(user, sendMessage, inputMessage);
+            var answer = registrationService.processRegistrationInline(user, sendMessage, inputMessage);
             var response = ResponseDto.builder()
                     .telegramBot(telegramBot)
                     .sendMessage(answer)

@@ -32,9 +32,7 @@ public class UserServiceImpl implements UserService {
                     .id(telegramUser.getId())
                     .name(telegramUser.getUserName())
                     .registerDate(LocalDateTime.now())
-                    //TODO
                     .state(UserState.WAIT_REGISTRATION)
-                    .isSearch(false)
                     .build();
             return userRepository.save(newUser);
         }

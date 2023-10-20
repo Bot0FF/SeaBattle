@@ -30,8 +30,5 @@ public class User {
     private UserState state;
 
     @Transient
-    private boolean isSearch;
-
-    @Transient
     private Long gameId;
 }

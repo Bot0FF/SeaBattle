@@ -12,13 +12,14 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import static org.bot0ff.entity.UserState.*;
 import static org.bot0ff.service.ServiceCommands.*;
 
+//обрабатывает запросы статуса ONLINE
 @Log4j
 @Service
 @RequiredArgsConstructor
 public class ActivityServiceImpl implements ActivityService {
     private final UserService userService;
 
-    //ответы на текстовые кнопки
+    //ответы на текстовые запросы
     @Override
     public SendMessage changeOptionsFromMenu(User user, SendMessage sendMessage, String cmd) {
         if(START.equals(cmd)) {
@@ -39,7 +40,7 @@ public class ActivityServiceImpl implements ActivityService {
         return sendMessage;
     }
 
-    //ответы на inline кнопки
+    //ответы на inline запросы
     @Override
     public SendMessage changeOptions(User user, SendMessage sendMessage, String cmd) {
         if(cmd.equals("/newGame")) {
