@@ -2,6 +2,7 @@ package org.bot0ff.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.bot0ff.controller.UpdateController;
+import org.bot0ff.entity.GameFiled;
 import org.bot0ff.entity.User;
 import org.bot0ff.entity.UserState;
 import org.bot0ff.repository.UserRepository;
@@ -33,6 +34,7 @@ public class UserServiceImpl implements UserService {
                     .name(telegramUser.getUserName())
                     .registerDate(LocalDateTime.now())
                     .state(UserState.WAIT_REGISTRATION)
+                    .gameFiled(new GameFiled())
                     .build();
             return userRepository.save(newUser);
         }

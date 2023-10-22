@@ -6,6 +6,7 @@ import org.bot0ff.component.button.InlineButton;
 import org.bot0ff.entity.User;
 import org.bot0ff.service.PrepareAutomaticService;
 import org.bot0ff.service.UserService;
+import org.bot0ff.service.prepare.AutomaticPrepareFiled;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
@@ -19,6 +20,7 @@ import static org.bot0ff.service.ServiceCommands.*;
 @RequiredArgsConstructor
 public class PrepareAutomaticServiceImpl implements PrepareAutomaticService {
     private final UserService userService;
+    private final AutomaticPrepareFiled automaticPrepareFiled;
 
     //ответы на текстовые запросы
     @Override
@@ -54,11 +56,13 @@ public class PrepareAutomaticServiceImpl implements PrepareAutomaticService {
             sendMessage.setText("Идет поиск противника");
         }
         else if(cmd.equals("/startAutomaticPrepare")) {
-            sendMessage.setText("Продолжить с текущей расстановкой? \n++++++");
+            var currentGameFiled = automaticPrepareFiled.getAutomaticGameFiled(user);
+            sendMessage.setText("Продолжить с текущей расстановкой?\n" + "currentGameFiled");
             sendMessage.setReplyMarkup(InlineButton.confirmAutomaticPrepare());
         }
         else if(cmd.equals("/updateAutomaticPrepare")) {
-            sendMessage.setText("Продолжить с текущей расстановкой? \n++++++");
+            var currentGameFiled = automaticPrepareFiled.getAutomaticGameFiled(user);
+            sendMessage.setText("Продолжить с текущей расстановкой?\n" + "currentGameFiled");
             sendMessage.setReplyMarkup(InlineButton.confirmAutomaticPrepare());
         }
         else {

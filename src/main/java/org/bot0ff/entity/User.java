@@ -1,10 +1,13 @@
 package org.bot0ff.entity;
 
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -15,6 +18,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "users")
 @Builder
+@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 public class User {
 
     @Id
@@ -29,6 +33,10 @@ public class User {
     @Enumerated(EnumType.STRING)
     private UserState state;
 
-    @Transient
+    @Column(name = "game_id")
     private Long gameId;
+
+    @Type(type = "jsonb")
+    @Column(name = "game_filed", columnDefinition = "jsonb")
+    private GameFiled gameFiled;
 }
