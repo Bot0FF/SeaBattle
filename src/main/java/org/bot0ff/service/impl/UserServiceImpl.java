@@ -1,8 +1,6 @@
 package org.bot0ff.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.bot0ff.controller.UpdateController;
-import org.bot0ff.entity.GameFiled;
 import org.bot0ff.entity.User;
 import org.bot0ff.entity.UserState;
 import org.bot0ff.repository.UserRepository;
@@ -11,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 @Service
 @RequiredArgsConstructor
@@ -34,7 +33,7 @@ public class UserServiceImpl implements UserService {
                     .name(telegramUser.getUserName())
                     .registerDate(LocalDateTime.now())
                     .state(UserState.WAIT_REGISTRATION)
-                    .gameFiled(new GameFiled())
+                    .gameFiled(new ArrayList<>())
                     .build();
             return userRepository.save(newUser);
         }

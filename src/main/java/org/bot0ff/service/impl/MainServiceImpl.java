@@ -25,7 +25,8 @@ public class MainServiceImpl implements MainService {
     private final PrepareManuallyService prepareManuallyService;
     private final PrepareAutomaticService prepareAutomaticService;
     private final SearchGameService searchGameService;
-    private final GameService gameService;
+    private final InGameService inGameService;
+    private final InGameService gameService;
 
     //перенаправляет текстовые запросы
     @Override
@@ -87,7 +88,7 @@ public class MainServiceImpl implements MainService {
             telegramBot.sendAnswer(response);
         }
         else if(IN_GAME.equals(userState)) {
-            var answer = getInfo("Идет сражение...", sendMessage);
+            var answer = inGameService.processTextMessage(user, sendMessage, inputMessage);
             var response = ResponseDto.builder()
                     .telegramBot(telegramBot)
                     .sendMessage(answer)

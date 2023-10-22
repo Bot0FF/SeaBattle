@@ -3,15 +3,17 @@ package org.bot0ff.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j;
 import org.bot0ff.component.button.InlineButton;
+import org.bot0ff.entity.AiUser;
 import org.bot0ff.entity.User;
 import org.bot0ff.service.PrepareAutomaticService;
 import org.bot0ff.service.UserService;
-import org.bot0ff.service.prepare.AutomaticPrepareFiled;
+import org.bot0ff.service.game.ActiveGames;
+import org.bot0ff.service.game.AutomaticPrepareFiled;
+import org.bot0ff.service.game.GenerateEmojiGameFiled;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
-import static org.bot0ff.entity.UserState.ONLINE;
-import static org.bot0ff.entity.UserState.SEARCH_GAME;
+import static org.bot0ff.entity.UserState.*;
 import static org.bot0ff.service.ServiceCommands.*;
 
 //обрабатывает запросы статуса PREPARE_AUTOMATIC
@@ -21,6 +23,8 @@ import static org.bot0ff.service.ServiceCommands.*;
 public class PrepareAutomaticServiceImpl implements PrepareAutomaticService {
     private final UserService userService;
     private final AutomaticPrepareFiled automaticPrepareFiled;
+    private final GenerateEmojiGameFiled generateEmojiGameFiled;
+    private final ActiveGames activeGames;
 
     //ответы на текстовые запросы
     @Override
@@ -50,20 +54,36 @@ public class PrepareAutomaticServiceImpl implements PrepareAutomaticService {
     //ответы на inline запросы
     @Override
     public SendMessage prepareGameAutomaticInline(User user, SendMessage sendMessage, String cmd) {
-        if(cmd.equals("/confirmAutomaticPrepare")) {
+        if(cmd.equals("/startAutomaticPrepare")) {
+            var currentGameFiled = automaticPrepareFiled.getAutomaticGameFiled();
+            user.setGameFiled(currentGameFiled);
+            userService.saveUser(user);
+            sendMessage.setText("Продолжить с текущей расстановкой?\n" + generateEmojiGameFiled.getEmojiGameFiled(currentGameFiled));
+            sendMessage.setReplyMarkup(InlineButton.confirmAutomaticPrepare());
+        }
+        else if(cmd.equals("/updateAutomaticPrepare")) {
+            var currentGameFiled = automaticPrepareFiled.getAutomaticGameFiled();
+            user.setGameFiled(currentGameFiled);
+            userService.saveUser(user);
+            sendMessage.setText("Продолжить с текущей расстановкой?\n" + generateEmojiGameFiled.getEmojiGameFiled(currentGameFiled));
+            sendMessage.setReplyMarkup(InlineButton.confirmAutomaticPrepare());
+        }
+        else if(cmd.equals("/confirmFindOpponent")) {
             user.setState(SEARCH_GAME);
             userService.saveUser(user);
             sendMessage.setText("Идет поиск противника");
         }
-        else if(cmd.equals("/startAutomaticPrepare")) {
-            var currentGameFiled = automaticPrepareFiled.getAutomaticGameFiled(user);
-            sendMessage.setText("Продолжить с текущей расстановкой?\n" + "currentGameFiled");
-            sendMessage.setReplyMarkup(InlineButton.confirmAutomaticPrepare());
-        }
-        else if(cmd.equals("/updateAutomaticPrepare")) {
-            var currentGameFiled = automaticPrepareFiled.getAutomaticGameFiled(user);
-            sendMessage.setText("Продолжить с текущей расстановкой?\n" + "currentGameFiled");
-            sendMessage.setReplyMarkup(InlineButton.confirmAutomaticPrepare());
+        else if(cmd.equals("/confirmGameVsAi")) {
+            user.setState(IN_GAME);
+            userService.saveUser(user);
+            var aiGameFiled = automaticPrepareFiled.getAutomaticGameFiled();
+            AiUser aiUser = new AiUser();
+            aiUser.setGameId((long) activeGames.activeGame.size());
+            aiUser.setGameFiled(aiGameFiled);
+            sendMessage.setText("Началась игра против ИИ. Первый ход ваш.\n" +
+                    "Поле противника\n" + generateEmojiGameFiled.getEmojiGameFiled(aiGameFiled) +
+                    "-----------------------\n" +
+                    "Ваше поле\n" + generateEmojiGameFiled.getEmojiGameFiled(user.getGameFiled()));
         }
         else {
             sendMessage.setText("Выбрана автоматическая расстановка кораблей");

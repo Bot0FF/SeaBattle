@@ -1,16 +1,14 @@
 package org.bot0ff.entity;
 
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
 
-import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -18,7 +16,6 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "users")
 @Builder
-@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 public class User {
 
     @Id
@@ -36,7 +33,6 @@ public class User {
     @Column(name = "game_id")
     private Long gameId;
 
-    @Type(type = "jsonb")
-    @Column(name = "game_filed", columnDefinition = "jsonb")
-    private GameFiled gameFiled;
+    @Column(name = "game_filed")
+    private List<String> gameFiled;
 }

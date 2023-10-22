@@ -3,9 +3,8 @@ package org.bot0ff.configuration;
 import lombok.extern.log4j.Log4j;
 import org.bot0ff.component.TelegramBot;
 import lombok.RequiredArgsConstructor;
-import org.apache.log4j.Logger;
 
-import org.bot0ff.service.ActiveGame;
+import org.bot0ff.service.game.ActiveGames;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Bean;
@@ -34,7 +33,7 @@ public class TelegramBotInit {
 
     @Bean
     @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
-    public ActiveGame getActiveGame() {
-        return new ActiveGame();
+    public ActiveGames getActiveGame() {
+        return new ActiveGames();
     }
 }

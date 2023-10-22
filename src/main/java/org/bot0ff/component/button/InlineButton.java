@@ -83,15 +83,19 @@ public class InlineButton {
     }
 
     public static InlineKeyboardMarkup confirmAutomaticPrepare() {
-        List<InlineKeyboardButton> confirm = new ArrayList<>();
-        List<InlineKeyboardButton> update = new ArrayList<>();
+        List<InlineKeyboardButton> updateGameFiled = new ArrayList<>();
+        List<InlineKeyboardButton> findOpponent = new ArrayList<>();
+        List<InlineKeyboardButton> gameVsAi = new ArrayList<>();
 
-        confirm.add(new InlineKeyboardButton("Начать поиск противника"));
-        confirm.get(0).setCallbackData("/confirmAutomaticPrepare");
-        update.add(new InlineKeyboardButton("Расставить еще раз"));
-        update.get(0).setCallbackData("/updateAutomaticPrepare");
+        updateGameFiled.add(new InlineKeyboardButton("Расставить еще раз"));
+        updateGameFiled.get(0).setCallbackData("/updateAutomaticPrepare");
+        findOpponent.add(new InlineKeyboardButton("Начать поиск противника"));
+        findOpponent.get(0).setCallbackData("/confirmFindOpponent");
+        gameVsAi.add(new InlineKeyboardButton("Начать игру против ИИ"));
+        gameVsAi.get(0).setCallbackData("/confirmGameVsAi");
 
-        List<List<InlineKeyboardButton>> rowsInLine = List.of(confirm, update);
+
+        List<List<InlineKeyboardButton>> rowsInLine = List.of(updateGameFiled, findOpponent, gameVsAi);
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
         markupInline.setKeyboard(rowsInLine);
 
