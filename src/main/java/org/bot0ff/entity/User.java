@@ -35,4 +35,10 @@ public class User {
 
     @Column(name = "game_filed")
     private List<String> gameFiled;
+
+    @Column(name = "change_target")
+    private String changeTarget;
+
+    @Column(name = "is_active")
+    private boolean isActive;
 }

@@ -11,6 +11,7 @@ import java.util.List;
 public class GenerateEmojiGameFiled {
     private final String water = EmojiParser.parseToUnicode(":droplet:");
     private final String ship = EmojiParser.parseToUnicode(":sailboat:");
+    private final String success = EmojiParser.parseToUnicode(":anchor:");
 
     private String emojiParser(String emojiName) {
         return EmojiParser.parseToUnicode(emojiName);
@@ -20,13 +21,21 @@ public class GenerateEmojiGameFiled {
         int [][] tempArr = new int[10][10];
         for(String coord : shipCoordinates) {
             String[] split = coord.split(":");
-            tempArr[Integer.parseInt(split[0])][Integer.parseInt(split[1])] = 2;
+            if(split[0].startsWith("-")) {
+                tempArr[Integer.parseInt(split[0])][Integer.parseInt(split[1])] = -1;
+            }
+            else {
+                tempArr[Integer.parseInt(split[0])][Integer.parseInt(split[1])] = 1;
+            }
         }
         StringBuilder sb = new StringBuilder();
         for(int ver = 0; ver < 10; ver++) {
             for(int hor = 0; hor < 10; hor++) {
-                if(tempArr[ver][hor] == 2) {
+                if(tempArr[ver][hor] == 1) {
                     sb.append(emojiParser(ship));
+                }
+                else if(tempArr[ver][hor] == -1) {
+                    sb.append(emojiParser(success));
                 }
                 else {
                     sb.append(emojiParser(water));

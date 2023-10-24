@@ -3,6 +3,7 @@ package org.bot0ff.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j;
 import org.bot0ff.component.button.InlineButton;
+import org.bot0ff.component.button.TextButton;
 import org.bot0ff.entity.AiUser;
 import org.bot0ff.entity.User;
 import org.bot0ff.service.PrepareAutomaticService;
@@ -74,16 +75,26 @@ public class PrepareAutomaticServiceImpl implements PrepareAutomaticService {
             sendMessage.setText("Идет поиск противника");
         }
         else if(cmd.equals("/confirmGameVsAi")) {
-            user.setState(IN_GAME);
-            userService.saveUser(user);
             var aiGameFiled = automaticPrepareFiled.getAutomaticGameFiled();
+            System.out.println(aiGameFiled);
+            Long newActiveGame = (long) ActiveGames.currentGames.size();
+            //set User
+            user.setState(IN_GAME);
+            user.setGameId(newActiveGame);
+            user.setActive(true);
+            userService.saveUser(user);
+            //set userAi
             AiUser aiUser = new AiUser();
-            aiUser.setGameId((long) activeGames.activeGame.size());
+            aiUser.setGameId(newActiveGame);
             aiUser.setGameFiled(aiGameFiled);
+            aiUser.setActive(false);
+            //set ActiveGame
+            activeGames.addUsers(aiUser);
             sendMessage.setText("Началась игра против ИИ. Первый ход ваш.\n" +
                     "Поле противника\n" + generateEmojiGameFiled.getEmojiGameFiled(aiGameFiled) +
                     "-----------------------\n" +
                     "Ваше поле\n" + generateEmojiGameFiled.getEmojiGameFiled(user.getGameFiled()));
+            sendMessage.setReplyMarkup(InlineButton.charGameBoard());
         }
         else {
             sendMessage.setText("Выбрана автоматическая расстановка кораблей");

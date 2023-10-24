@@ -32,8 +32,8 @@ public class AutomaticPrepareFiled {
     public List<String> getAutomaticGameFiled() {
         resultFiled = new ArrayList<>();
         prepareFiled = new int[10][10];
-        for(int ver = 0; ver < 10; ver++) {
-            for(int hor = 0; hor < 10; hor++) {
+        for(int ver = 0; ver < 10; ver++) { //буквы по вертикали
+            for(int hor = 0; hor < 10; hor++) { //цифры по горизонтали
                 prepareFiled[ver][hor] = 0;
             }
         }

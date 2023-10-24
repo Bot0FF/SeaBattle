@@ -6,7 +6,9 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Data
 @Component
@@ -116,37 +118,57 @@ public class InlineButton {
         return markupInline;
     }
 
-//    //список вещей user для ремонта
-//    public static InlineKeyboardMarkup buttonListThingForRepair(List<UserThing> userThings, User user) {
-//        List<List<InlineKeyboardButton>> listButton = new ArrayList<>();
-//        listButton.add(new ArrayList<>());
-//
-//        for(int i = 0, a = 0; i < userThings.size(); i++) {
-//            UserThing userThing = userThings.get(i);
-//            if(userThing.getThingId() == user.getUserHead()
-//                    | userThing.getThingId() == user.getUserBody()
-//                    | userThing.getThingId() == user.getUserLegs()
-//                    | userThing.getThingId() == user.getUserWeapon()
-//                    | userThing.getThingId() == user.getUserEffect()) {
-//                userThing.setThingName("(Н)" + userThing.getThingName());
-//            }
-//            InlineKeyboardButton thingButton = new InlineKeyboardButton(userThing.getThingName());
-//            thingButton.setCallbackData("/armory:repairThing:[" + userThing.getThingId() + "]");
-//            listButton.get(a).add(thingButton);
-//            if(listButton.get(a).size() >= 3) {
-//                listButton.add(new ArrayList<>());
-//                a++;
-//            }
-//        }
-//
-//        List<InlineKeyboardButton> buttonArmory = new ArrayList<>();
+    //отменить поиск противника
+    public static InlineKeyboardMarkup charGameBoard() {
+        List<List<InlineKeyboardButton>> listButton = new ArrayList<>();
+        listButton.add(new ArrayList<>());
+
+        char[] chars = {'А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ж', 'З', 'И' ,'К'};
+        for(int i = 0, a = 0; i < chars.length; i++) {
+            InlineKeyboardButton thingButton = new InlineKeyboardButton(String.valueOf(chars[i]));
+            thingButton.setCallbackData(String.valueOf(chars[i]));
+            listButton.get(a).add(thingButton);
+            if(listButton.get(a).size() > 4) {
+                listButton.add(new ArrayList<>());
+                a++;
+            }
+        }
+
+        List<InlineKeyboardButton> buttonArmory = new ArrayList<>();
 //        buttonArmory.add(new InlineKeyboardButton("Оружейная"));
 //        buttonArmory.get(0).setCallbackData("/Оружейная");
-//        listButton.add(listButton.size(), buttonArmory);
-//
-//        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
-//        markupInline.setKeyboard(listButton);
-//
-//        return markupInline;
-//    }
+        listButton.add(listButton.size(), buttonArmory);
+
+        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+        markupInline.setKeyboard(listButton);
+
+        return markupInline;
+    }
+
+    //отменить поиск противника
+    public static InlineKeyboardMarkup numGameBoard() {
+        List<List<InlineKeyboardButton>> listButton = new ArrayList<>();
+        listButton.add(new ArrayList<>());
+
+        int[] ints = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+        for(int i = 0, a = 0; i < ints.length; i++) {
+            InlineKeyboardButton thingButton = new InlineKeyboardButton(String.valueOf(ints[i]));
+            thingButton.setCallbackData(String.valueOf(ints[i]));
+            listButton.get(a).add(thingButton);
+            if(listButton.get(a).size() > 4) {
+                listButton.add(new ArrayList<>());
+                a++;
+            }
+        }
+
+        List<InlineKeyboardButton> buttonArmory = new ArrayList<>();
+//        buttonArmory.add(new InlineKeyboardButton("Оружейная"));
+//        buttonArmory.get(0).setCallbackData("/Оружейная");
+        listButton.add(listButton.size(), buttonArmory);
+
+        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+        markupInline.setKeyboard(listButton);
+
+        return markupInline;
+    }
 }

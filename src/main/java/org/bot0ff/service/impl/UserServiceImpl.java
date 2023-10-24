@@ -34,6 +34,8 @@ public class UserServiceImpl implements UserService {
                     .registerDate(LocalDateTime.now())
                     .state(UserState.WAIT_REGISTRATION)
                     .gameFiled(new ArrayList<>())
+                    .changeTarget("")
+                    .isActive(false)
                     .build();
             return userRepository.save(newUser);
         }

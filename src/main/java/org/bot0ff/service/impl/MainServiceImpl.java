@@ -171,6 +171,15 @@ public class MainServiceImpl implements MainService {
                     .build();
             telegramBot.sendAnswer(response);
         }
+        else if(IN_GAME.equals(userState)) {
+            var answer = inGameService.processCallbackQuery(user, sendMessage, inputMessage);
+            var response = ResponseDto.builder()
+                    .telegramBot(telegramBot)
+                    .sendMessage(answer)
+                    .answerCallbackQuery(answerCallbackQuery)
+                    .build();
+            telegramBot.sendAnswer(response);
+        }
     }
 
     private SendMessage getInfo(String msg, SendMessage sendMessage) {
