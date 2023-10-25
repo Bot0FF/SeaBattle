@@ -52,6 +52,17 @@ public class AutomaticPrepareFiled {
         getShips(1);
         getShips(1);
 
+        //заполняет оставшиеся координаты в поле
+        for(int ver = 0; ver < 10; ver++) { //буквы по вертикали
+            for(int hor = 0; hor < 10; hor++) { //цифры по горизонтали
+                String exist = ver + ":" + hor;
+                String notExist = ver + "_" + hor;
+                if(resultFiled.stream().noneMatch(coordinates -> coordinates.equals(exist))) {
+                    resultFiled.add(notExist);
+                }
+            }
+        }
+
         return resultFiled;
     }
 

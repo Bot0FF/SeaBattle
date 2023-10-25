@@ -6,7 +6,6 @@ import org.bot0ff.entity.User;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Log4j
 @Service
@@ -17,6 +16,7 @@ public class GameService {
 
     }
 
+    //проверяет попадание user
     public boolean checkEndStep(String userChangeTarget, User userAi) {
         String[] split = userChangeTarget.split(":");
         switch (split[0]) {
@@ -43,15 +43,22 @@ public class GameService {
             case "9" -> split[1] = "8";
             case "10" -> split[1] = "9";
         }
-        String temp = split[0] + ":" + split[1];
-        System.out.println(temp);
+        String existShip = split[0] + ":" + split[1];
+        String notExistShip = split[0] + "_" + split[1];
         List<String> userAiFiled = userAi.getGameFiled();
-        if(userAiFiled.stream().anyMatch(userAiShip -> userAiShip.equals(temp))) {
-            userAiFiled = userAiFiled.stream().map(target -> target.equals(temp) ? ("-" + split[0] + ":" + split[1]) : target).toList();
-            userAi.setGameFiled(userAiFiled);
-            return true;
+        for (String coordinate : userAiFiled) {
+            if(coordinate.equals(existShip)) {
+                userAiFiled = userAiFiled.stream().map(target -> target.equals(existShip) ? (split[0] + "-" + split[1]) : target).toList();
+                userAi.setGameFiled(userAiFiled);
+                return true;
+            }
+            else if(coordinate.equals(notExistShip)) {
+                userAiFiled = userAiFiled.stream().map(target -> target.equals(notExistShip) ? (split[0] + "/" + split[1]) : target).toList();
+                userAi.setGameFiled(userAiFiled);
+                return false;
+            }
         }
-        else return false;
+        return false;
     }
 
     public void calculateResult(User user) {

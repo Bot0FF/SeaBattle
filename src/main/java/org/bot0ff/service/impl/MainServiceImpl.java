@@ -172,7 +172,7 @@ public class MainServiceImpl implements MainService {
             telegramBot.sendAnswer(response);
         }
         else if(IN_GAME.equals(userState)) {
-            var answer = inGameService.processCallbackQuery(user, sendMessage, inputMessage);
+            var answer = inGameService.processCallbackQuery(update, user, sendMessage, inputMessage);
             var response = ResponseDto.builder()
                     .telegramBot(telegramBot)
                     .sendMessage(answer)

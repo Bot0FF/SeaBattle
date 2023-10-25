@@ -6,6 +6,7 @@ import lombok.extern.log4j.Log4j;
 import org.bot0ff.component.button.TextButton;
 import org.bot0ff.controller.UpdateController;
 import org.bot0ff.dto.ResponseDto;
+import org.bot0ff.controller.UserAiController;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
@@ -25,10 +26,12 @@ public class TelegramBot extends TelegramLongPollingBot {
     @Value("${bot.token}")
     private String botToken;
     private final UpdateController updateController;
+    private final UserAiController userAiController;
 
     @PostConstruct
     private void init() {
         updateController.registerBot(this);
+        userAiController.registerBot(this);
         try {
             this.execute(new SetMyCommands(TextButton.commandMarkup(), new BotCommandScopeDefault(), null));
         } catch (TelegramApiException e) {

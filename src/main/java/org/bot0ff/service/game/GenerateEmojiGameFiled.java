@@ -12,21 +12,32 @@ public class GenerateEmojiGameFiled {
     private final String water = EmojiParser.parseToUnicode(":droplet:");
     private final String ship = EmojiParser.parseToUnicode(":sailboat:");
     private final String success = EmojiParser.parseToUnicode(":anchor:");
+    private final String miss = EmojiParser.parseToUnicode(":mag:");
 
     private String emojiParser(String emojiName) {
         return EmojiParser.parseToUnicode(emojiName);
     }
 
-    public StringBuilder getEmojiGameFiled(List<String> shipCoordinates) {
+    public StringBuilder getEmojiGameFiled(List<String> gameFiled) {
         int [][] tempArr = new int[10][10];
-        for(String coord : shipCoordinates) {
-            String[] split = coord.split(":");
-            if(split[0].startsWith("-")) {
-                tempArr[Integer.parseInt(split[0])][Integer.parseInt(split[1])] = -1;
+        for(String coord : gameFiled) {
+            if(coord.contains(":")) {
+                String[] split = coord.split(":");
+                tempArr[Integer.parseInt(split[0])][Integer.parseInt(split[1])] = 1; //корабль есть
             }
-            else {
-                tempArr[Integer.parseInt(split[0])][Integer.parseInt(split[1])] = 1;
+            if(coord.contains("_")) {
+                String[] split = coord.split("_");
+                tempArr[Integer.parseInt(split[0])][Integer.parseInt(split[1])] = 2; //вода
             }
+            else if(coord.contains("-")) {
+                String[] split = coord.split("-");
+                tempArr[Integer.parseInt(split[0])][Integer.parseInt(split[1])] = -1; //корабль подбит
+            }
+            else if(coord.contains("/")) {
+                String[] split = coord.split("/");
+                tempArr[Integer.parseInt(split[0])][Integer.parseInt(split[1])] = 0; //мимо
+            }
+
         }
         StringBuilder sb = new StringBuilder();
         for(int ver = 0; ver < 10; ver++) {
@@ -36,6 +47,9 @@ public class GenerateEmojiGameFiled {
                 }
                 else if(tempArr[ver][hor] == -1) {
                     sb.append(emojiParser(success));
+                }
+                else if(tempArr[ver][hor] == 0) {
+                    sb.append(emojiParser(miss));
                 }
                 else {
                     sb.append(emojiParser(water));

@@ -76,7 +76,6 @@ public class PrepareAutomaticServiceImpl implements PrepareAutomaticService {
         }
         else if(cmd.equals("/confirmGameVsAi")) {
             var aiGameFiled = automaticPrepareFiled.getAutomaticGameFiled();
-            System.out.println(aiGameFiled);
             Long newActiveGame = (long) ActiveGames.currentGames.size();
             //set User
             user.setState(IN_GAME);
