@@ -3,6 +3,7 @@ package org.bot0ff.service.game;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j;
 import org.bot0ff.entity.User;
+import org.bot0ff.service.UserService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,13 +12,14 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class GameService {
+    private final UserService userService;
 
     public void startRound(User user) {
 
     }
 
     //проверяет попадание user
-    public boolean checkEndStep(String userChangeTarget, User userAi) {
+    public int checkUserStep(String userChangeTarget, User user) {
         String[] split = userChangeTarget.split(":");
         switch (split[0]) {
             case "А" -> split[0] = "0";
@@ -45,20 +47,28 @@ public class GameService {
         }
         String existShip = split[0] + ":" + split[1];
         String notExistShip = split[0] + "_" + split[1];
-        List<String> userAiFiled = userAi.getGameFiled();
+        List<String> userAiFiled = user.getAiGameFiled();
+        int result = 0;
         for (String coordinate : userAiFiled) {
             if(coordinate.equals(existShip)) {
                 userAiFiled = userAiFiled.stream().map(target -> target.equals(existShip) ? (split[0] + "-" + split[1]) : target).toList();
-                userAi.setGameFiled(userAiFiled);
-                return true;
+                user.setAiGameFiled(userAiFiled);
+                result = 1;
             }
             else if(coordinate.equals(notExistShip)) {
                 userAiFiled = userAiFiled.stream().map(target -> target.equals(notExistShip) ? (split[0] + "/" + split[1]) : target).toList();
-                userAi.setGameFiled(userAiFiled);
-                return false;
+                user.setActive(false);
+                user.setAiGameFiled(userAiFiled);
+                result = 0;
             }
         }
-        return false;
+        //проверка на оставшиеся корабли
+        if(userAiFiled.stream().noneMatch(aliveShip -> aliveShip.contains(":"))) {
+            result = -1;
+        }
+        user.setChangeTarget("");
+        userService.saveUser(user);
+        return result;
     }
 
     public void calculateResult(User user) {

@@ -32,7 +32,7 @@ public class InlineButton {
         List<InlineKeyboardButton> newGame = new ArrayList<>();
 
         newGame.add(new InlineKeyboardButton("Начать новую игру"));
-        newGame.get(0).setCallbackData("/newGame");
+        newGame.get(0).setCallbackData("newGame");
 
         List<List<InlineKeyboardButton>> rowsInLine = List.of(newGame);
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
@@ -47,9 +47,9 @@ public class InlineButton {
         List<InlineKeyboardButton> newGameVsUser = new ArrayList<>();
 
         newGameVsAI.add(new InlineKeyboardButton("Расставить вручную"));
-        newGameVsAI.get(0).setCallbackData("/prepareManually");
+        newGameVsAI.get(0).setCallbackData("prepareManually");
         newGameVsUser.add(new InlineKeyboardButton("Расставить автоматически"));
-        newGameVsUser.get(0).setCallbackData("/prepareAutomatic");
+        newGameVsUser.get(0).setCallbackData("prepareAutomatic");
 
         List<List<InlineKeyboardButton>> rowsInLine = List.of(newGameVsAI, newGameVsUser);
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
@@ -75,7 +75,7 @@ public class InlineButton {
         List<InlineKeyboardButton> manuallyPrepare = new ArrayList<>();
 
         manuallyPrepare.add(new InlineKeyboardButton("Начать расстановку"));
-        manuallyPrepare.get(0).setCallbackData("/startAutomaticPrepare");
+        manuallyPrepare.get(0).setCallbackData("startAutomaticPrepare");
 
         List<List<InlineKeyboardButton>> rowsInLine = List.of(manuallyPrepare);
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
@@ -90,11 +90,11 @@ public class InlineButton {
         List<InlineKeyboardButton> gameVsAi = new ArrayList<>();
 
         updateGameFiled.add(new InlineKeyboardButton("Расставить еще раз"));
-        updateGameFiled.get(0).setCallbackData("/updateAutomaticPrepare");
+        updateGameFiled.get(0).setCallbackData("updateAutomaticPrepare");
         findOpponent.add(new InlineKeyboardButton("Начать поиск противника"));
-        findOpponent.get(0).setCallbackData("/confirmFindOpponent");
+        findOpponent.get(0).setCallbackData("confirmFindOpponent");
         gameVsAi.add(new InlineKeyboardButton("Начать игру против ИИ"));
-        gameVsAi.get(0).setCallbackData("/confirmGameVsAi");
+        gameVsAi.get(0).setCallbackData("confirmGameVsAi");
 
 
         List<List<InlineKeyboardButton>> rowsInLine = List.of(updateGameFiled, findOpponent, gameVsAi);

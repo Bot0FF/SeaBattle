@@ -6,6 +6,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static org.bot0ff.util.Constants.HORIZONTAL_LENGTH;
+import static org.bot0ff.util.Constants.VERTICAL_LENGTH;
+
 @Log4j
 @Service
 public class GenerateEmojiGameFiled {
@@ -19,7 +22,7 @@ public class GenerateEmojiGameFiled {
     }
 
     public StringBuilder getEmojiGameFiled(List<String> gameFiled) {
-        int [][] tempArr = new int[10][10];
+        int [][] tempArr = new int[VERTICAL_LENGTH][HORIZONTAL_LENGTH];
         for(String coord : gameFiled) {
             if(coord.contains(":")) {
                 String[] split = coord.split(":");
@@ -40,8 +43,8 @@ public class GenerateEmojiGameFiled {
 
         }
         StringBuilder sb = new StringBuilder();
-        for(int ver = 0; ver < 10; ver++) {
-            for(int hor = 0; hor < 10; hor++) {
+        for(int ver = 0; ver < VERTICAL_LENGTH; ver++) {
+            for(int hor = 0; hor < HORIZONTAL_LENGTH; hor++) {
                 if(tempArr[ver][hor] == 1) {
                     sb.append(emojiParser(ship));
                 }

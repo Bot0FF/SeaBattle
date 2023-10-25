@@ -23,22 +23,20 @@ public class PrepareGameServiceImpl implements PrepareGameService {
     @Override
     public SendMessage optionsPrepareGameText(User user, SendMessage sendMessage, String cmd) {
         if(START.equals(cmd)) {
-            sendMessage.setText("Выберите вариант расстановки кораблей");
+            sendMessage.setText("Расстановка кораблей...");
             sendMessage.setReplyMarkup(InlineButton.changePlacementOption());
         }
         else if(CANCEL.equals(cmd)) {
             user.setState(ONLINE);
             userService.saveUser(user);
-            sendMessage.setText("""
-                    Параметры сброшены.
-                    Выберите что хотите сделать""");
+            sendMessage.setText("Сброс настроек игры...\nВыберите действие, " + user.getName());
             sendMessage.setReplyMarkup(InlineButton.changeOptions());
         }
         else if(HELP.equals(cmd)) {
             sendMessage.setText("Помощь");
         }
         else {
-            sendMessage.setText("Выберите вариант расстановки кораблей");
+            sendMessage.setText("Расстановка кораблей...");
             sendMessage.setReplyMarkup(InlineButton.changePlacementOption());
         }
         return sendMessage;
@@ -47,20 +45,20 @@ public class PrepareGameServiceImpl implements PrepareGameService {
     //ответы на inline запросы
     @Override
     public SendMessage optionsPrepareGameInline(User user, SendMessage sendMessage, String cmd) {
-        if(cmd.equals("/prepareManually")) {
+        if(cmd.equals("prepareManually")) {
             user.setState(PREPARE_MANUALLY);
             userService.saveUser(user);
-            sendMessage.setText("Выбрана ручная расстановка кораблей");
+            sendMessage.setText("Ручная расстановка кораблей...");
             sendMessage.setReplyMarkup(InlineButton.startManuallyPrepare());
         }
-        else if(cmd.equals("/prepareAutomatic")) {
+        else if(cmd.equals("prepareAutomatic")) {
             user.setState(PREPARE_AUTOMATIC);
             userService.saveUser(user);
-            sendMessage.setText("Выбрана автоматическая расстановка кораблей");
+            sendMessage.setText("Автоматическая расстановка кораблей...");
             sendMessage.setReplyMarkup(InlineButton.startAutomaticPrepare());
         }
         else {
-            sendMessage.setText("Выберите вариант расстановки кораблей");
+            sendMessage.setText("Расстановка кораблей...");
             sendMessage.setReplyMarkup(InlineButton.changePlacementOption());
         }
         return sendMessage;

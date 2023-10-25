@@ -34,6 +34,8 @@ public class UserServiceImpl implements UserService {
                     .registerDate(LocalDateTime.now())
                     .state(UserState.WAIT_REGISTRATION)
                     .gameFiled(new ArrayList<>())
+                    .aiGameFiled(new ArrayList<>())
+                    .gameId(0L)
                     .changeTarget("")
                     .isActive(false)
                     .build();

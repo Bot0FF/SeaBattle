@@ -33,6 +33,8 @@ public class MainServiceImpl implements MainService {
     public void processTextMessage(TelegramBot telegramBot, Update update) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(update.getMessage().getChatId());
+        var answerCallbackQuery = new AnswerCallbackQuery();
+        answerCallbackQuery.setCallbackQueryId(String.valueOf(update.getMessage().getChatId()));
 
         var user = userService.findOrSaveUser(update);
         var userState = user.getState();
@@ -173,6 +175,7 @@ public class MainServiceImpl implements MainService {
         }
         else if(IN_GAME.equals(userState)) {
             var answer = inGameService.processCallbackQuery(update, user, sendMessage, inputMessage);
+
             var response = ResponseDto.builder()
                     .telegramBot(telegramBot)
                     .sendMessage(answer)

@@ -24,28 +24,28 @@ public class RegistrationServiceImpl implements RegistrationService {
     public SendMessage processRegistrationText(User user, SendMessage sendMessage, String cmd) {
         if(START.equals(cmd)) {
             sendMessage.setText("""
-                    Добро пожаловать в игру "Морской Бой"!
-                    Это классическая игра, где можно играть с реальными противниками или с ИИ.
-                    Для начала введите желаемое имя и отправьте его или нажмите кнопку "Оставить как есть\"""");
+                    Добро пожаловать в "Морской Бой"!
+                    Введите имя или оставьте как есть...""");
             sendMessage.setReplyMarkup(InlineButton.registrationButton());
         }
         else if(HELP.equals(cmd)) {
             sendMessage.setText("Помощь");
         }
         else if(CANCEL.equals(cmd)) {
-            sendMessage.setText("Для начала введите желаемое имя и отправьте его или нажмите кнопку \"Оставить как есть\"");
+            sendMessage.setText("Введите имя или оставьте как есть...");
             sendMessage.setReplyMarkup(InlineButton.registrationButton());
         }
         else if(cmd.length() > 10 | cmd.length() < 3){
-            sendMessage.setText("Имя должно быть не больше 10 символов и не меньше 3. " +
-                    "Для продолжения введите желаемое имя и отправьте его или нажмите кнопку \"Оставить как есть\"");
+            sendMessage.setText("""
+                    Имя должно быть не больше 10 символов и не меньше 3. 
+                    Введите имя или оставьте как есть...""");
             sendMessage.setReplyMarkup(InlineButton.registrationButton());
         }
         else {
             user.setName(cmd);
             user.setState(ONLINE);
             userService.saveUser(user);
-            sendMessage.setText("Выберите что хотите сделать");
+            sendMessage.setText("Выберите действие, " + user.getName());
             sendMessage.setReplyMarkup(InlineButton.changeOptions());
         }
         return sendMessage;
@@ -58,11 +58,11 @@ public class RegistrationServiceImpl implements RegistrationService {
             user.setName(user.getName());
             user.setState(ONLINE);
             userService.saveUser(user);
-            sendMessage.setText("Выберите что хотите сделать");
+            sendMessage.setText("Выберите действие, " + user.getName());
             sendMessage.setReplyMarkup(InlineButton.changeOptions());
         }
         else {
-            sendMessage.setText("Для начала введите желаемое имя и отправьте его или нажмите кнопку \"Оставить как есть\"");
+            sendMessage.setText("Введите имя или оставьте как есть...");
             sendMessage.setReplyMarkup(InlineButton.registrationButton());
         }
         return sendMessage;

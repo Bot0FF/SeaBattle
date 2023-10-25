@@ -8,6 +8,9 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.bot0ff.util.Constants.HORIZONTAL_LENGTH;
+import static org.bot0ff.util.Constants.VERTICAL_LENGTH;
+
 
 /**
     Создание игрового поля с автоматической расстановкой кораблей
@@ -31,30 +34,30 @@ public class AutomaticPrepareFiled {
 
     public List<String> getAutomaticGameFiled() {
         resultFiled = new ArrayList<>();
-        prepareFiled = new int[10][10];
-        for(int ver = 0; ver < 10; ver++) { //буквы по вертикали
-            for(int hor = 0; hor < 10; hor++) { //цифры по горизонтали
+        prepareFiled = new int[VERTICAL_LENGTH][HORIZONTAL_LENGTH];
+        for(int ver = 0; ver < VERTICAL_LENGTH; ver++) { //буквы по вертикали
+            for(int hor = 0; hor < HORIZONTAL_LENGTH; hor++) { //цифры по горизонтали
                 prepareFiled[ver][hor] = 0;
             }
         }
 
-        getShips(4);
-
-        getShips(3);
-        getShips(3);
-
-        getShips(2);
-        getShips(2);
-        getShips(2);
-
-        getShips(1);
-        getShips(1);
-        getShips(1);
+//        getShips(4);
+//
+//        getShips(3);
+//        getShips(3);
+//
+//        getShips(2);
+//        getShips(2);
+//        getShips(2);
+//
+//        getShips(1);
+//        getShips(1);
+//        getShips(1);
         getShips(1);
 
         //заполняет оставшиеся координаты в поле
-        for(int ver = 0; ver < 10; ver++) { //буквы по вертикали
-            for(int hor = 0; hor < 10; hor++) { //цифры по горизонтали
+        for(int ver = 0; ver < VERTICAL_LENGTH; ver++) { //буквы по вертикали
+            for(int hor = 0; hor < HORIZONTAL_LENGTH; hor++) { //цифры по горизонтали
                 String exist = ver + ":" + hor;
                 String notExist = ver + "_" + hor;
                 if(resultFiled.stream().noneMatch(coordinates -> coordinates.equals(exist))) {
@@ -114,23 +117,23 @@ public class AutomaticPrepareFiled {
             if(pointVertical > 0 & pointHorizontal > 0) {
                 this.prepareFiled[(pointVertical - 1)][(pointHorizontal - 1)] = 1;
             }
-            if(pointVertical > 0 & pointHorizontal < 9) {
+            if(pointVertical > 0 & pointHorizontal < HORIZONTAL_LENGTH - 1) {
                 this.prepareFiled[(pointVertical - 1)][(pointHorizontal + 1)] = 1;
             }
-            if((pointVertical + shipLength - 1) < 9) {
+            if((pointVertical + shipLength - 1) < VERTICAL_LENGTH - 1) {
                 this.prepareFiled[(pointVertical + shipLength)][pointHorizontal] = 1;
             }
-            if((pointVertical + shipLength - 1) < 9 & pointHorizontal > 0) {
+            if((pointVertical + shipLength - 1) < VERTICAL_LENGTH - 1 & pointHorizontal > 0) {
                 this.prepareFiled[(pointVertical + shipLength)][(pointHorizontal - 1)] = 1;
             }
-            if((pointVertical + shipLength - 1) < 9 & pointHorizontal < 9) {
+            if((pointVertical + shipLength - 1) < VERTICAL_LENGTH - 1 & pointHorizontal < HORIZONTAL_LENGTH - 1) {
                 this.prepareFiled[(pointVertical + shipLength)][(pointHorizontal + 1)] = 1;
             }
             for(int ver = pointVertical; ver < pointVertical + shipLength; ver++) {
                 if(pointHorizontal > 0) {
                     this.prepareFiled[ver][(pointHorizontal - 1)] = 1;
                 }
-                if(pointHorizontal < 9) {
+                if(pointHorizontal < HORIZONTAL_LENGTH - 1) {
                     this.prepareFiled[ver][(pointHorizontal + 1)] = 1;
                 }
                 this.prepareFiled[ver][pointHorizontal] = 2;
@@ -180,23 +183,23 @@ public class AutomaticPrepareFiled {
             if(pointHorizontal > 0 & pointVertical > 0) {
                 this.prepareFiled[(pointVertical - 1)][(pointHorizontal - 1)] = 1;
             }
-            if(pointHorizontal > 0 & pointVertical < 9) {
+            if(pointHorizontal > 0 & pointVertical < VERTICAL_LENGTH - 1) {
                 this.prepareFiled[(pointVertical + 1)][(pointHorizontal - 1)] = 1;
             }
-            if((pointHorizontal + shipLength - 1) < 9) {
+            if((pointHorizontal + shipLength - 1) < HORIZONTAL_LENGTH - 1) {
                 this.prepareFiled[pointVertical][(pointHorizontal + shipLength)] = 1;
             }
-            if((pointHorizontal + shipLength - 1) < 9 & pointVertical > 0) {
+            if((pointHorizontal + shipLength - 1) < HORIZONTAL_LENGTH - 1 & pointVertical > 0) {
                 this.prepareFiled[(pointVertical - 1)][(pointHorizontal + shipLength)] = 1;
             }
-            if((pointHorizontal + shipLength - 1) < 9 & pointVertical < 9) {
+            if((pointHorizontal + shipLength - 1) < HORIZONTAL_LENGTH - 1 & pointVertical < VERTICAL_LENGTH - 1) {
                 this.prepareFiled[(pointVertical + 1)][(pointHorizontal + shipLength)] = 1;
             }
             for(int hor = pointHorizontal; hor < pointHorizontal + shipLength; hor++) {
                 if(pointVertical > 0) {
                     this.prepareFiled[(pointVertical - 1)][hor] = 1;
                 }
-                if(pointVertical < 9) {
+                if(pointVertical < VERTICAL_LENGTH - 1) {
                     this.prepareFiled[(pointVertical + 1)][hor] = 1;
                 }
                 this.prepareFiled[pointVertical][hor] = 2;
@@ -208,7 +211,7 @@ public class AutomaticPrepareFiled {
     //рандом 0-9
     private int getRNum(int shipLength) {
         RandomDataGenerator randomGenerator = new RandomDataGenerator();
-        return randomGenerator.nextInt(0, 9 - shipLength);
+        return randomGenerator.nextInt(0, VERTICAL_LENGTH - 1 - shipLength);
     }
     //рандом 0-1
     private int getR0Or1() {

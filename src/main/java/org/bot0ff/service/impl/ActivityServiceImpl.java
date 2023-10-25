@@ -23,18 +23,18 @@ public class ActivityServiceImpl implements ActivityService {
     @Override
     public SendMessage changeOptionsFromMenu(User user, SendMessage sendMessage, String cmd) {
         if(START.equals(cmd)) {
-            sendMessage.setText("Выберите что хотите сделать");
+            sendMessage.setText("Выберите действие, " + user.getName());
             sendMessage.setReplyMarkup(InlineButton.changeOptions());
         }
         else if(CANCEL.equals(cmd)) {
-            sendMessage.setText("Выберите что хотите сделать");
+            sendMessage.setText("Текущих сражений нет...");
             sendMessage.setReplyMarkup(InlineButton.changeOptions());
         }
         else if(HELP.equals(cmd)) {
             sendMessage.setText("Помощь");
         }
         else {
-            sendMessage.setText("Выберите что хотите сделать");
+            sendMessage.setText("Выберите действие, " + user.getName());
             sendMessage.setReplyMarkup(InlineButton.changeOptions());
         }
         return sendMessage;
@@ -43,14 +43,14 @@ public class ActivityServiceImpl implements ActivityService {
     //ответы на inline запросы
     @Override
     public SendMessage changeOptions(User user, SendMessage sendMessage, String cmd) {
-        if(cmd.equals("/newGame")) {
+        if(cmd.equals("newGame")) {
             user.setState(PREPARE_GAME);
             userService.saveUser(user);
-            sendMessage.setText("Выберите вариант расстановки кораблей");
+            sendMessage.setText("Расстановка кораблей...");
             sendMessage.setReplyMarkup(InlineButton.changePlacementOption());
         }
         else {
-            sendMessage.setText("Выберите что хотите сделать");
+            sendMessage.setText("Выберите действие, " + user.getName());
             sendMessage.setReplyMarkup(InlineButton.changeOptions());
         }
         return sendMessage;

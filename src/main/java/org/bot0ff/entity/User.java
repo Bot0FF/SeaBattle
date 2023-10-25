@@ -36,6 +36,9 @@ public class User {
     @Column(name = "game_filed")
     private List<String> gameFiled;
 
+    @Column(name = "ai_game_filed")
+    private List<String> aiGameFiled;
+
     @Column(name = "change_target")
     private String changeTarget;
 

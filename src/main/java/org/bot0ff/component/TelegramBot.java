@@ -4,6 +4,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j;
 import org.bot0ff.component.button.TextButton;
+import org.bot0ff.controller.EndGameController;
 import org.bot0ff.controller.UpdateController;
 import org.bot0ff.dto.ResponseDto;
 import org.bot0ff.controller.UserAiController;
@@ -27,11 +28,13 @@ public class TelegramBot extends TelegramLongPollingBot {
     private String botToken;
     private final UpdateController updateController;
     private final UserAiController userAiController;
+    private final EndGameController endGameController;
 
     @PostConstruct
     private void init() {
         updateController.registerBot(this);
         userAiController.registerBot(this);
+        endGameController.registerBot(this);
         try {
             this.execute(new SetMyCommands(TextButton.commandMarkup(), new BotCommandScopeDefault(), null));
         } catch (TelegramApiException e) {
@@ -56,12 +59,14 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     public void sendAnswer(ResponseDto responseDto) {
         try {
-            execute(responseDto.getSendMessage());
+            if(responseDto.getSendMessage() != null) {
+                execute(responseDto.getSendMessage());
+            }
             if(responseDto.getAnswerCallbackQuery() != null) {
                 execute(responseDto.getAnswerCallbackQuery());
             }
         } catch (TelegramApiException e) {
-            log.error(e);
+            e.printStackTrace();
         }
 
     }
