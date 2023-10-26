@@ -44,4 +44,13 @@ public class User {
 
     @Column(name = "is_active")
     private boolean isActive;
+
+    @Column(name = "one_deck_ship")
+    private int oneDeckShip;
+    @Column(name = "two_deck_ship")
+    private int twoDeckShip;
+    @Column(name = "three_deck_ship")
+    private int threeDeckShip;
+    @Column(name = "four_deck_ship")
+    private int fourDeckShip;
 }

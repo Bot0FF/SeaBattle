@@ -25,7 +25,7 @@ import static org.bot0ff.util.Constants.GAME_FILED_LENGTH;
 @Log4j
 @Service
 @RequiredArgsConstructor
-public class AutoPrepareFiledService {
+public class AutoPrepareService {
 
     private List<String> resultFiled;
     private int[][] prepareFiled;

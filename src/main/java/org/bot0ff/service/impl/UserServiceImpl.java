@@ -38,6 +38,10 @@ public class UserServiceImpl implements UserService {
                     .gameId(0L)
                     .changeTarget("")
                     .isActive(false)
+                    .oneDeckShip(0)
+                    .twoDeckShip(0)
+                    .threeDeckShip(0)
+                    .fourDeskShip(0)
                     .build();
             return userRepository.save(newUser);
         }

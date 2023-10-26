@@ -62,7 +62,7 @@ public class InlineButton {
         List<InlineKeyboardButton> manuallyPrepare = new ArrayList<>();
 
         manuallyPrepare.add(new InlineKeyboardButton("Начать расстановку"));
-        manuallyPrepare.get(0).setCallbackData("/startManuallyPrepare");
+        manuallyPrepare.get(0).setCallbackData("startManuallyPrepare");
 
         List<List<InlineKeyboardButton>> rowsInLine = List.of(manuallyPrepare);
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
@@ -104,12 +104,40 @@ public class InlineButton {
         return markupInline;
     }
 
+    //управление расстановкой кораблей
+    public static InlineKeyboardMarkup moveShip() {
+        List<InlineKeyboardButton> firstLine = new ArrayList<>();
+        List<InlineKeyboardButton> secondLine = new ArrayList<>();
+
+        firstLine.add(new InlineKeyboardButton("<"));
+        firstLine.add(new InlineKeyboardButton(">"));
+        firstLine.add(new InlineKeyboardButton("()"));
+        firstLine.add(new InlineKeyboardButton("A"));
+        firstLine.add(new InlineKeyboardButton("V"));
+        firstLine.get(0).setCallbackData("moveLeft");
+        firstLine.get(1).setCallbackData("moveRight");
+        firstLine.get(2).setCallbackData("rotateShip");
+        firstLine.get(3).setCallbackData("moveUp");
+        firstLine.get(4).setCallbackData("moveDown");
+
+        secondLine.add(new InlineKeyboardButton("Подтвердить"));
+        secondLine.add(new InlineKeyboardButton("Отменить"));
+        secondLine.get(0).setCallbackData("setShip");
+        secondLine.get(1).setCallbackData("cancelShip");
+
+        List<List<InlineKeyboardButton>> rowsInLine = List.of(firstLine, secondLine);
+        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+        markupInline.setKeyboard(rowsInLine);
+
+        return markupInline;
+    }
+
     //отменить поиск противника
     public static InlineKeyboardMarkup stopSearchGameButton() {
         List<InlineKeyboardButton> stopSearchGame = new ArrayList<>();
 
         stopSearchGame.add(new InlineKeyboardButton("Отменить поиск сражения"));
-        stopSearchGame.get(0).setCallbackData("/stopSearchGame");
+        stopSearchGame.get(0).setCallbackData("stopSearchGame");
 
         List<List<InlineKeyboardButton>> rowsInLine = List.of(stopSearchGame);
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
@@ -118,7 +146,7 @@ public class InlineButton {
         return markupInline;
     }
 
-    //отменить поиск противника
+    //кнопки А-К
     public static InlineKeyboardMarkup charGameBoard() {
         List<List<InlineKeyboardButton>> listButton = new ArrayList<>();
         listButton.add(new ArrayList<>());
@@ -134,18 +162,13 @@ public class InlineButton {
             }
         }
 
-        List<InlineKeyboardButton> buttonArmory = new ArrayList<>();
-//        buttonArmory.add(new InlineKeyboardButton("Оружейная"));
-//        buttonArmory.get(0).setCallbackData("/Оружейная");
-        listButton.add(listButton.size(), buttonArmory);
-
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
         markupInline.setKeyboard(listButton);
 
         return markupInline;
     }
 
-    //отменить поиск противника
+    //кнопки 1-10
     public static InlineKeyboardMarkup numGameBoard() {
         List<List<InlineKeyboardButton>> listButton = new ArrayList<>();
         listButton.add(new ArrayList<>());
@@ -160,11 +183,6 @@ public class InlineButton {
                 a++;
             }
         }
-
-        List<InlineKeyboardButton> buttonArmory = new ArrayList<>();
-//        buttonArmory.add(new InlineKeyboardButton("Оружейная"));
-//        buttonArmory.get(0).setCallbackData("/Оружейная");
-        listButton.add(listButton.size(), buttonArmory);
 
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
         markupInline.setKeyboard(listButton);

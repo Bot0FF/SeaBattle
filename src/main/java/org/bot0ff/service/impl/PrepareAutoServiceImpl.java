@@ -6,7 +6,7 @@ import org.bot0ff.component.button.InlineButton;
 import org.bot0ff.entity.User;
 import org.bot0ff.service.PrepareAutomaticService;
 import org.bot0ff.service.UserService;
-import org.bot0ff.service.game.AutoPrepareFiledService;
+import org.bot0ff.service.game.AutoPrepareService;
 import org.bot0ff.service.game.GameMessageService;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -20,7 +20,7 @@ import static org.bot0ff.service.ServiceCommands.*;
 @RequiredArgsConstructor
 public class PrepareAutoServiceImpl implements PrepareAutomaticService {
     private final UserService userService;
-    private final AutoPrepareFiledService autoPrepareFiledService;
+    private final AutoPrepareService autoPrepareService;
     private final GameMessageService gameMessageService;
 
     //ответы на текстовые запросы
@@ -51,7 +51,7 @@ public class PrepareAutoServiceImpl implements PrepareAutomaticService {
     public SendMessage prepareGameAutomaticInline(User user, SendMessage sendMessage, String cmd) {
         switch (cmd) {
             case "startAutomaticPrepare", "updateAutomaticPrepare" -> {
-                var userGameFiled = autoPrepareFiledService.getAutomaticGameFiled();
+                var userGameFiled = autoPrepareService.getAutomaticGameFiled();
                 user.setGameFiled(userGameFiled);
                 userService.saveUser(user);
                 sendMessage.setText("Продолжить с текущей расстановкой?\n" + gameMessageService.getEmojiGameFiled(userGameFiled));
@@ -64,7 +64,7 @@ public class PrepareAutoServiceImpl implements PrepareAutomaticService {
             }
             case "confirmGameVsAi" -> {
                 //set userAi
-                var aiGameFiled = autoPrepareFiledService.getAutomaticGameFiled();
+                var aiGameFiled = autoPrepareService.getAutomaticGameFiled();
                 user.setAiGameFiled(aiGameFiled);
                 //set User
                 user.setState(IN_GAME);
