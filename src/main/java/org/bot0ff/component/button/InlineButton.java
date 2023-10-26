@@ -6,9 +6,9 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+
+import static org.bot0ff.util.Constants.GAME_FILED_LENGTH;
 
 @Data
 @Component
@@ -124,7 +124,7 @@ public class InlineButton {
         listButton.add(new ArrayList<>());
 
         char[] chars = {'А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ж', 'З', 'И' ,'К'};
-        for(int i = 0, a = 0; i < chars.length; i++) {
+        for(int i = 0, a = 0; i < GAME_FILED_LENGTH; i++) {
             InlineKeyboardButton thingButton = new InlineKeyboardButton(String.valueOf(chars[i]));
             thingButton.setCallbackData(String.valueOf(chars[i]));
             listButton.get(a).add(thingButton);
@@ -151,7 +151,7 @@ public class InlineButton {
         listButton.add(new ArrayList<>());
 
         int[] ints = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-        for(int i = 0, a = 0; i < ints.length; i++) {
+        for(int i = 0, a = 0; i < GAME_FILED_LENGTH; i++) {
             InlineKeyboardButton thingButton = new InlineKeyboardButton(String.valueOf(ints[i]));
             thingButton.setCallbackData(String.valueOf(ints[i]));
             listButton.get(a).add(thingButton);

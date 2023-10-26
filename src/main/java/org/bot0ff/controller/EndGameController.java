@@ -7,8 +7,6 @@ import org.bot0ff.component.button.InlineButton;
 import org.bot0ff.dto.ResponseDto;
 import org.bot0ff.entity.User;
 import org.bot0ff.service.UserService;
-import org.bot0ff.service.game.GameService;
-import org.bot0ff.service.game.GenerateEmojiGameFiled;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -28,13 +26,12 @@ public class EndGameController {
     private static final ExecutorService EXECUTOR_SERVICE = Executors.newCachedThreadPool();
     private TelegramBot telegramBot;
     private final UserService userService;
-    private final GameService gameService;
-    private final GenerateEmojiGameFiled generateEmojiGameFiled;
 
     public void registerBot(TelegramBot telegramBot) {
         this.telegramBot = telegramBot;
     }
 
+    //сбрасывает настройки user и отправляет главную страницу по завершению игры
     public void endGame(Update update) {
         EXECUTOR_SERVICE.execute(() -> {
             try {

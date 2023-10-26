@@ -8,10 +8,8 @@ import org.bot0ff.component.button.InlineButton;
 import org.bot0ff.dto.ResponseDto;
 import org.bot0ff.entity.User;
 import org.bot0ff.service.UserService;
-import org.bot0ff.service.game.GameService;
-import org.bot0ff.service.game.GenerateEmojiGameFiled;
+import org.bot0ff.service.game.GameMessageService;
 import org.springframework.stereotype.Service;
-import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
@@ -22,8 +20,16 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static org.bot0ff.entity.UserState.ONLINE;
-import static org.bot0ff.util.Constants.VERTICAL_LENGTH;
+import static org.bot0ff.util.Constants.GAME_FILED_LENGTH;
 
+/**
+ Контроллер ИИ. При передаче управления производит ход до тех пор,
+ пока попадает, либо пока не осталось кораблей у игрока.
+ Если ИИ попадает по ранее выбранной координате, ход выполняется еще раз
+ до тех пор, пока попадет по ранее не выбранной координате.
+**/
+
+//TODO сделать выбор координат по соседним квадратам, в случае попадания
 @Log4j
 @Service
 @RequiredArgsConstructor
@@ -31,7 +37,7 @@ public class UserAiController {
     private static final ExecutorService EXECUTOR_SERVICE = Executors.newCachedThreadPool();
     private TelegramBot telegramBot;
     private final UserService userService;
-    private final GenerateEmojiGameFiled generateEmojiGameFiled;
+    private final GameMessageService gameMessageService;
 
     public void registerBot(TelegramBot telegramBot) {
         this.telegramBot = telegramBot;
@@ -39,22 +45,29 @@ public class UserAiController {
 
     public void userAiAction(Update update, User user) {
         var sendMessage = new SendMessage();
-        sendMessage.setChatId(update.getCallbackQuery().getMessage().getChatId());
-        var answerCallbackQuery = new AnswerCallbackQuery();
-        answerCallbackQuery.setCallbackQueryId(update.getCallbackQuery().getId());
+        if(update.hasMessage()) {
+            sendMessage.setChatId(update.getMessage().getChatId());
+        }
+        else if(update.hasCallbackQuery()) {
+            sendMessage.setChatId(update.getCallbackQuery().getMessage().getChatId());
+        }
+        else return;
 
         EXECUTOR_SERVICE.execute(() -> {
             try {
                 var checkAiStep = 0;
                 do {
-                    TimeUnit.SECONDS.sleep(3);
+                    TimeUnit.SECONDS.sleep(2);
                     checkAiStep = checkAiStep(user);
                     if(checkAiStep == 1) {
-                        sendMessage.setText(getCurrentGameFiled("Противник попал и продолжает ход", user));
+                        sendMessage.setText(gameMessageService.getCurrentGameFiled("Противник попал и продолжает ход...", user));
+                    }
+                    else if(checkAiStep == -1) {
+                        sendMessage.setText(gameMessageService.getCurrentGameFiled("Противник не попал. Ваш ход...", user));
+                        sendMessage.setReplyMarkup(InlineButton.charGameBoard());
                     }
                     else if(checkAiStep == 0) {
-                        sendMessage.setText(getCurrentGameFiled("Противник не попал. Ваш ход", user));
-                        sendMessage.setReplyMarkup(InlineButton.charGameBoard());
+                        sendMessage.setText("Ожидание хода противника...");
                     }
                     else {
                         sendMessage.setText("Поражение...\nВыберите действие, " + user.getName());
@@ -66,7 +79,7 @@ public class UserAiController {
                             .build();
                     telegramBot.sendAnswer(response);
                 }
-                while (checkAiStep == 1);
+                while (checkAiStep == 1 | checkAiStep == 0);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -75,23 +88,26 @@ public class UserAiController {
 
     //проверяет попадание ИИ
     private int checkAiStep(User user) {
+        List<String> userFiled = user.getGameFiled();
         int ver = getRNum();
         int hor = getRNum();
-        String existShip = ver + ":" + hor;
+        String existShip  = ver + ":" + hor;
         String notExistShip = ver + "_" + hor;
-        List<String> userFiled = user.getGameFiled();
         int result = 0;
+
         for (String coordinate : userFiled) {
             if(coordinate.equals(existShip)) {
                 userFiled = userFiled.stream().map(target -> target.equals(existShip) ? (ver + "-" + hor) : target).toList();
                 user.setGameFiled(userFiled);
+                userService.saveUser(user);
                 result = 1;
             }
             else if(coordinate.equals(notExistShip)) {
                 userFiled = userFiled.stream().map(target -> target.equals(notExistShip) ? (ver + "/" + hor) : target).toList();
                 user.setActive(true);
                 user.setGameFiled(userFiled);
-                result = 0;
+                userService.saveUser(user);
+                result = -1;
             }
         }
         //проверка на оставшиеся корабли
@@ -100,22 +116,15 @@ public class UserAiController {
             user.setActive(false);
             user.setGameFiled(new ArrayList<>());
             user.setAiGameFiled(new ArrayList<>());
-            result = -1;
+            userService.saveUser(user);
+            result = -2;
         }
-        userService.saveUser(user);
         return result;
     }
 
     //рандом 0-9
     private int getRNum() {
         RandomDataGenerator randomGenerator = new RandomDataGenerator();
-        return randomGenerator.nextInt(0, VERTICAL_LENGTH - 1);
-    }
-
-    private String getCurrentGameFiled(String notification, User user) {
-        return  notification +
-                "\nПоле противника\n" + generateEmojiGameFiled.getEmojiGameFiled(user.getAiGameFiled()) +
-                "-----------------------\n" +
-                "Ваше поле\n" + generateEmojiGameFiled.getEmojiGameFiled(user.getGameFiled());
+        return randomGenerator.nextInt(0, (GAME_FILED_LENGTH - 1));
     }
 }

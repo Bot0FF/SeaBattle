@@ -44,7 +44,7 @@ public class ActivityServiceImpl implements ActivityService {
     @Override
     public SendMessage changeOptions(User user, SendMessage sendMessage, String cmd) {
         if(cmd.equals("newGame")) {
-            user.setState(PREPARE_GAME);
+            user.setState(CHANGE_GAME_FILED);
             userService.saveUser(user);
             sendMessage.setText("Расстановка кораблей...");
             sendMessage.setReplyMarkup(InlineButton.changePlacementOption());

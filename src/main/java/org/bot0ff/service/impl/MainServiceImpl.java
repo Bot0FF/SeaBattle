@@ -21,7 +21,7 @@ public class MainServiceImpl implements MainService {
     private final UserService userService;
     private final RegistrationService registrationService;
     private final ActivityService activityService;
-    private final PrepareGameService prepareGameService;
+    private final ChangeGameFiledService changeGameFiledService;
     private final PrepareManuallyService prepareManuallyService;
     private final PrepareAutomaticService prepareAutomaticService;
     private final SearchGameService searchGameService;
@@ -56,8 +56,8 @@ public class MainServiceImpl implements MainService {
                     .build();
             telegramBot.sendAnswer(response);
         }
-        else if(PREPARE_GAME.equals(userState)) {
-            var answer = prepareGameService.optionsPrepareGameText(user, sendMessage, inputMessage);
+        else if(CHANGE_GAME_FILED.equals(userState)) {
+            var answer = changeGameFiledService.optionsPrepareGameText(user, sendMessage, inputMessage);
             var response = ResponseDto.builder()
                     .telegramBot(telegramBot)
                     .sendMessage(answer)
@@ -90,7 +90,7 @@ public class MainServiceImpl implements MainService {
             telegramBot.sendAnswer(response);
         }
         else if(IN_GAME.equals(userState)) {
-            var answer = inGameService.processTextMessage(user, sendMessage, inputMessage);
+            var answer = inGameService.processTextMessage(update, user, sendMessage, inputMessage);
             var response = ResponseDto.builder()
                     .telegramBot(telegramBot)
                     .sendMessage(answer)
@@ -137,8 +137,8 @@ public class MainServiceImpl implements MainService {
                     .build();
             telegramBot.sendAnswer(response);
         }
-        else if(PREPARE_GAME.equals(userState)) {
-            var answer = prepareGameService.optionsPrepareGameInline(user, sendMessage, inputMessage);
+        else if(CHANGE_GAME_FILED.equals(userState)) {
+            var answer = changeGameFiledService.optionsPrepareGameInline(user, sendMessage, inputMessage);
             var response = ResponseDto.builder()
                     .telegramBot(telegramBot)
                     .sendMessage(answer)

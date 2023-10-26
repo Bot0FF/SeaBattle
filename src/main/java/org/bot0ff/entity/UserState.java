@@ -4,7 +4,7 @@ public enum UserState {
     WAIT_REGISTRATION, //ожидает ввода имени или сохранения текущего имени
     ONLINE, //в статусе онлайн
     SEARCH_GAME, //ожидает поиска противника
-    PREPARE_GAME,//подготовка игры
+    CHANGE_GAME_FILED,//выбор способа расстановки игрового поля
     PREPARE_MANUALLY,//подготовка игрового поля вручную
     PREPARE_AUTOMATIC, //подготовка игрового поля автоматически
     READY_FOR_GAME,

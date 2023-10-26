@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j;
 import org.bot0ff.component.button.InlineButton;
 import org.bot0ff.entity.User;
-import org.bot0ff.service.PrepareGameService;
+import org.bot0ff.service.ChangeGameFiledService;
 import org.bot0ff.service.UserService;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -12,11 +12,11 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import static org.bot0ff.entity.UserState.*;
 import static org.bot0ff.service.ServiceCommands.*;
 
-//обрабатывает запросы статуса PREPARE_GAME
+//обрабатывает запросы статуса CHANGE_GAME_FILED
 @Log4j
 @Service
 @RequiredArgsConstructor
-public class PrepareGameServiceImpl implements PrepareGameService {
+public class ChangeGameFiledServiceImpl implements ChangeGameFiledService {
     private final UserService userService;
 
     //ответы на текстовые запросы

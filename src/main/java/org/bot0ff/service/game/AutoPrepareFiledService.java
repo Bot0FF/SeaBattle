@@ -8,9 +8,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.bot0ff.util.Constants.HORIZONTAL_LENGTH;
-import static org.bot0ff.util.Constants.VERTICAL_LENGTH;
-
+import static org.bot0ff.util.Constants.GAME_FILED_LENGTH;
 
 /**
     Создание игрового поля с автоматической расстановкой кораблей
@@ -27,16 +25,16 @@ import static org.bot0ff.util.Constants.VERTICAL_LENGTH;
 @Log4j
 @Service
 @RequiredArgsConstructor
-public class AutomaticPrepareFiled {
+public class AutoPrepareFiledService {
 
     private List<String> resultFiled;
     private int[][] prepareFiled;
 
     public List<String> getAutomaticGameFiled() {
         resultFiled = new ArrayList<>();
-        prepareFiled = new int[VERTICAL_LENGTH][HORIZONTAL_LENGTH];
-        for(int ver = 0; ver < VERTICAL_LENGTH; ver++) { //буквы по вертикали
-            for(int hor = 0; hor < HORIZONTAL_LENGTH; hor++) { //цифры по горизонтали
+        prepareFiled = new int[GAME_FILED_LENGTH][GAME_FILED_LENGTH];
+        for(int ver = 0; ver < GAME_FILED_LENGTH; ver++) { //буквы по вертикали
+            for(int hor = 0; hor < GAME_FILED_LENGTH; hor++) { //цифры по горизонтали
                 prepareFiled[ver][hor] = 0;
             }
         }
@@ -56,8 +54,8 @@ public class AutomaticPrepareFiled {
         getShips(1);
 
         //заполняет оставшиеся координаты в поле
-        for(int ver = 0; ver < VERTICAL_LENGTH; ver++) { //буквы по вертикали
-            for(int hor = 0; hor < HORIZONTAL_LENGTH; hor++) { //цифры по горизонтали
+        for(int ver = 0; ver < GAME_FILED_LENGTH; ver++) { //буквы по вертикали
+            for(int hor = 0; hor < GAME_FILED_LENGTH; hor++) { //цифры по горизонтали
                 String exist = ver + ":" + hor;
                 String notExist = ver + "_" + hor;
                 if(resultFiled.stream().noneMatch(coordinates -> coordinates.equals(exist))) {
@@ -117,23 +115,23 @@ public class AutomaticPrepareFiled {
             if(pointVertical > 0 & pointHorizontal > 0) {
                 this.prepareFiled[(pointVertical - 1)][(pointHorizontal - 1)] = 1;
             }
-            if(pointVertical > 0 & pointHorizontal < HORIZONTAL_LENGTH - 1) {
+            if(pointVertical > 0 & pointHorizontal < (GAME_FILED_LENGTH - 1)) {
                 this.prepareFiled[(pointVertical - 1)][(pointHorizontal + 1)] = 1;
             }
-            if((pointVertical + shipLength - 1) < VERTICAL_LENGTH - 1) {
+            if((pointVertical + shipLength - 1) < (GAME_FILED_LENGTH - 1)) {
                 this.prepareFiled[(pointVertical + shipLength)][pointHorizontal] = 1;
             }
-            if((pointVertical + shipLength - 1) < VERTICAL_LENGTH - 1 & pointHorizontal > 0) {
+            if((pointVertical + shipLength - 1) < (GAME_FILED_LENGTH - 1) & pointHorizontal > 0) {
                 this.prepareFiled[(pointVertical + shipLength)][(pointHorizontal - 1)] = 1;
             }
-            if((pointVertical + shipLength - 1) < VERTICAL_LENGTH - 1 & pointHorizontal < HORIZONTAL_LENGTH - 1) {
+            if((pointVertical + shipLength - 1) < (GAME_FILED_LENGTH - 1) & pointHorizontal < (GAME_FILED_LENGTH - 1)) {
                 this.prepareFiled[(pointVertical + shipLength)][(pointHorizontal + 1)] = 1;
             }
             for(int ver = pointVertical; ver < pointVertical + shipLength; ver++) {
                 if(pointHorizontal > 0) {
                     this.prepareFiled[ver][(pointHorizontal - 1)] = 1;
                 }
-                if(pointHorizontal < HORIZONTAL_LENGTH - 1) {
+                if(pointHorizontal < (GAME_FILED_LENGTH - 1)) {
                     this.prepareFiled[ver][(pointHorizontal + 1)] = 1;
                 }
                 this.prepareFiled[ver][pointHorizontal] = 2;
@@ -183,23 +181,23 @@ public class AutomaticPrepareFiled {
             if(pointHorizontal > 0 & pointVertical > 0) {
                 this.prepareFiled[(pointVertical - 1)][(pointHorizontal - 1)] = 1;
             }
-            if(pointHorizontal > 0 & pointVertical < VERTICAL_LENGTH - 1) {
+            if(pointHorizontal > 0 & pointVertical < (GAME_FILED_LENGTH - 1)) {
                 this.prepareFiled[(pointVertical + 1)][(pointHorizontal - 1)] = 1;
             }
-            if((pointHorizontal + shipLength - 1) < HORIZONTAL_LENGTH - 1) {
+            if((pointHorizontal + shipLength - 1) < (GAME_FILED_LENGTH - 1)) {
                 this.prepareFiled[pointVertical][(pointHorizontal + shipLength)] = 1;
             }
-            if((pointHorizontal + shipLength - 1) < HORIZONTAL_LENGTH - 1 & pointVertical > 0) {
+            if((pointHorizontal + shipLength - 1) < (GAME_FILED_LENGTH - 1) & pointVertical > 0) {
                 this.prepareFiled[(pointVertical - 1)][(pointHorizontal + shipLength)] = 1;
             }
-            if((pointHorizontal + shipLength - 1) < HORIZONTAL_LENGTH - 1 & pointVertical < VERTICAL_LENGTH - 1) {
+            if((pointHorizontal + shipLength - 1) < (GAME_FILED_LENGTH - 1) & pointVertical < (GAME_FILED_LENGTH - 1)) {
                 this.prepareFiled[(pointVertical + 1)][(pointHorizontal + shipLength)] = 1;
             }
             for(int hor = pointHorizontal; hor < pointHorizontal + shipLength; hor++) {
                 if(pointVertical > 0) {
                     this.prepareFiled[(pointVertical - 1)][hor] = 1;
                 }
-                if(pointVertical < VERTICAL_LENGTH - 1) {
+                if(pointVertical < (GAME_FILED_LENGTH - 1)) {
                     this.prepareFiled[(pointVertical + 1)][hor] = 1;
                 }
                 this.prepareFiled[pointVertical][hor] = 2;
@@ -211,7 +209,7 @@ public class AutomaticPrepareFiled {
     //рандом 0-9
     private int getRNum(int shipLength) {
         RandomDataGenerator randomGenerator = new RandomDataGenerator();
-        return randomGenerator.nextInt(0, VERTICAL_LENGTH - 1 - shipLength);
+        return randomGenerator.nextInt(0, (GAME_FILED_LENGTH - 1) - shipLength);
     }
     //рандом 0-1
     private int getR0Or1() {

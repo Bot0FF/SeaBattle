@@ -14,10 +14,6 @@ import java.util.List;
 public class GameService {
     private final UserService userService;
 
-    public void startRound(User user) {
-
-    }
-
     //проверяет попадание user
     public int checkUserStep(String userChangeTarget, User user) {
         String[] split = userChangeTarget.split(":");
@@ -69,9 +65,5 @@ public class GameService {
         user.setChangeTarget("");
         userService.saveUser(user);
         return result;
-    }
-
-    public void calculateResult(User user) {
-
     }
 }

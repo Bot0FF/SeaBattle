@@ -9,7 +9,7 @@ import org.bot0ff.service.InGameService;
 import org.bot0ff.service.UserService;
 import org.bot0ff.controller.UserAiController;
 import org.bot0ff.service.game.GameService;
-import org.bot0ff.service.game.GenerateEmojiGameFiled;
+import org.bot0ff.service.game.GameMessageService;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -24,12 +24,13 @@ import static org.bot0ff.service.ServiceCommands.*;
 public class InGameServiceImpl implements InGameService {
     private final UserService userService;
     private final GameService gameService;
-    private final GenerateEmojiGameFiled generateEmojiGameFiled;
+    private final GameMessageService gameMessageService;
     private final UserAiController userAiController;
     private final EndGameController endGameController;
 
+    //ответы на текстовые запросы
     @Override
-    public SendMessage processTextMessage(User user, SendMessage sendMessage, String cmd) {
+    public SendMessage processTextMessage(Update update, User user, SendMessage sendMessage, String cmd) {
         if(CANCEL.equals(cmd)) {
             user.setState(ONLINE);
             userService.saveUser(user);
@@ -41,37 +42,39 @@ public class InGameServiceImpl implements InGameService {
         }
         else {
             if(user.isActive() & user.getChangeTarget().isEmpty()) {
-                sendMessage.setText(getCurrentGameFiled("Ваш ход", user));
+                sendMessage.setText(gameMessageService.getCurrentGameFiled("Ваш ход...", user));
                 sendMessage.setReplyMarkup(InlineButton.charGameBoard());
             }
             else if(user.isActive() & !user.getChangeTarget().isEmpty()) {
-                sendMessage.setText(getCurrentGameFiled("Ваш ход", user));
+                sendMessage.setText(gameMessageService.getCurrentGameFiled("Ваш ход...", user));
                 sendMessage.setReplyMarkup(InlineButton.numGameBoard());
             }
             else {
                 sendMessage.setText("Идет сражение...");
+                userAiController.userAiAction(update, user);
             }
         }
         return sendMessage;
     }
 
+    //ответы на inline запросы
     @Override
     public SendMessage processCallbackQuery(Update update, User user, SendMessage sendMessage, String cmd) {
         if(user.isActive() & cmd.matches("[А-К]") & user.getChangeTarget().isEmpty()) {
             user.setChangeTarget(cmd);
             userService.saveUser(user);
-            sendMessage.setText(getCurrentGameFiled("Ваш ход", user));
+            sendMessage.setText(gameMessageService.getCurrentGameFiled("Ваш ход...", user));
             sendMessage.setReplyMarkup(InlineButton.numGameBoard());
         }
         else if(user.isActive() & cmd.matches("[1-9]|10") & !user.getChangeTarget().isEmpty()) {
             var userChangeTarget = user.getChangeTarget() + ":" + cmd;
             var checkStepUser = gameService.checkUserStep(userChangeTarget, user);
             if(checkStepUser == 1) {
-                sendMessage.setText(getCurrentGameFiled("Вы попали. Ваш ход", user));
+                sendMessage.setText(gameMessageService.getCurrentGameFiled("Вы попали! Ваш ход...", user));
                 sendMessage.setReplyMarkup(InlineButton.charGameBoard());
             }
             else if(checkStepUser == 0) {
-                sendMessage.setText(getCurrentGameFiled("Вы не попали. Ход противника", user));
+                sendMessage.setText(gameMessageService.getCurrentGameFiled("Вы не попали! Ход противника...", user));
                 userAiController.userAiAction(update, user);
             }
             else {
@@ -81,26 +84,20 @@ public class InGameServiceImpl implements InGameService {
         }
         else {
             if(user.isActive()) {
-                if(user.isActive() & user.getChangeTarget().isEmpty()) {
-                    sendMessage.setText(getCurrentGameFiled("Ваш ход", user));
+                if(user.getChangeTarget().isEmpty()) {
+                    sendMessage.setText(gameMessageService.getCurrentGameFiled("Ваш ход", user));
                     sendMessage.setReplyMarkup(InlineButton.charGameBoard());
                 }
-                else if(user.isActive() & !user.getChangeTarget().isEmpty()) {
-                    sendMessage.setText(getCurrentGameFiled("Ваш ход", user));
+                else {
+                    sendMessage.setText(gameMessageService.getCurrentGameFiled("Ваш ход", user));
                     sendMessage.setReplyMarkup(InlineButton.numGameBoard());
                 }
             }
             else {
                 sendMessage.setText("Идет сражение...");
+                userAiController.userAiAction(update, user);
             }
         }
         return sendMessage;
-    }
-
-    private String getCurrentGameFiled(String notification, User user) {
-        return  notification +
-                "\nПоле противника\n" + generateEmojiGameFiled.getEmojiGameFiled(user.getAiGameFiled()) +
-                "-----------------------\n" +
-                "Ваше поле\n" + generateEmojiGameFiled.getEmojiGameFiled(user.getGameFiled());
     }
 }
