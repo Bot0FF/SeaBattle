@@ -1,6 +1,9 @@
 package org.bot0ff.component.button;
 
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
+import org.bot0ff.entity.User;
+import org.bot0ff.service.game.GameMessageService;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
@@ -12,7 +15,10 @@ import static org.bot0ff.util.Constants.GAME_FILED_LENGTH;
 
 @Data
 @Component
+@RequiredArgsConstructor
 public class InlineButton {
+    private final GameMessageService gameMessageService;
+
     //оставить имя как есть при регистрации
     public static InlineKeyboardMarkup registrationButton() {
         List<InlineKeyboardButton> registration = new ArrayList<>();
@@ -105,29 +111,35 @@ public class InlineButton {
     }
 
     //управление расстановкой кораблей
-    public static InlineKeyboardMarkup moveShip() {
-        List<InlineKeyboardButton> firstLine = new ArrayList<>();
-        List<InlineKeyboardButton> secondLine = new ArrayList<>();
+    public static InlineKeyboardMarkup setManuallyPrepareShip(User user) {
+        int[][] tempUserFiled = new int[GAME_FILED_LENGTH][GAME_FILED_LENGTH];
+        for(String coordinates : user.getGameFiled()) {
+            String[] split;
+            if(coordinates.contains(":")) {
+                split = coordinates.split(":");
+                tempUserFiled[Integer.parseInt(split[0])][Integer.parseInt(split[1])] = 1;
+            }
+            else if(coordinates.contains("-")) {
+                split = coordinates.split("-");
+                tempUserFiled[Integer.parseInt(split[0])][Integer.parseInt(split[1])] = 2;
+            }
+        }
+        List<List<InlineKeyboardButton>> listButton = new ArrayList<>();
+        listButton.add(new ArrayList<>());
 
-        firstLine.add(new InlineKeyboardButton("<"));
-        firstLine.add(new InlineKeyboardButton(">"));
-        firstLine.add(new InlineKeyboardButton("()"));
-        firstLine.add(new InlineKeyboardButton("A"));
-        firstLine.add(new InlineKeyboardButton("V"));
-        firstLine.get(0).setCallbackData("moveLeft");
-        firstLine.get(1).setCallbackData("moveRight");
-        firstLine.get(2).setCallbackData("rotateShip");
-        firstLine.get(3).setCallbackData("moveUp");
-        firstLine.get(4).setCallbackData("moveDown");
+        for(int ver = 0; ver < GAME_FILED_LENGTH; ver++) {
+            for(int hor = 0; hor < GAME_FILED_LENGTH; hor++) {
+                if(hor == 0) {
+                    listButton.add(new ArrayList<>());
+                }
+                InlineKeyboardButton thingButton = new InlineKeyboardButton(" ");
+                thingButton.setCallbackData("data");
+                listButton.get(ver).add(thingButton);
+            }
+        }
 
-        secondLine.add(new InlineKeyboardButton("Подтвердить"));
-        secondLine.add(new InlineKeyboardButton("Отменить"));
-        secondLine.get(0).setCallbackData("setShip");
-        secondLine.get(1).setCallbackData("cancelShip");
-
-        List<List<InlineKeyboardButton>> rowsInLine = List.of(firstLine, secondLine);
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
-        markupInline.setKeyboard(rowsInLine);
+        markupInline.setKeyboard(listButton);
 
         return markupInline;
     }

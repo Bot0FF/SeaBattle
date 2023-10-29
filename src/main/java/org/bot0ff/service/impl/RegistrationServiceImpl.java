@@ -8,6 +8,7 @@ import org.bot0ff.service.RegistrationService;
 import org.bot0ff.service.UserService;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 
 import static org.bot0ff.entity.UserState.ONLINE;
 import static org.bot0ff.service.ServiceCommands.*;
@@ -21,7 +22,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
     //ответы на текстовые запросы
     @Override
-    public SendMessage processRegistrationText(User user, SendMessage sendMessage, String cmd) {
+    public User processRegistrationText(User user, SendMessage sendMessage, String cmd) {
         if(START.equals(cmd)) {
             sendMessage.setText("""
                     Добро пожаловать в "Морской Бой"!
@@ -48,23 +49,24 @@ public class RegistrationServiceImpl implements RegistrationService {
             sendMessage.setText("Выберите действие, " + user.getName());
             sendMessage.setReplyMarkup(InlineButton.changeOptions());
         }
-        return sendMessage;
+        user.setSendMessage(sendMessage);
+        return user;
     }
 
     //ответы на inline запросы
     @Override
-    public SendMessage processRegistrationInline(User user, SendMessage sendMessage, String cmd) {
+    public User processRegistrationInline(User user, EditMessageText editMessageText, String cmd) {
         if(cmd.equals("/newUserWithCurrentName")) {
             user.setName(user.getName());
             user.setState(ONLINE);
-            userService.saveUser(user);
-            sendMessage.setText("Выберите действие, " + user.getName());
-            sendMessage.setReplyMarkup(InlineButton.changeOptions());
+            editMessageText.setText("Выберите действие, " + user.getName());
+            editMessageText.setReplyMarkup(InlineButton.changeOptions());
         }
         else {
-            sendMessage.setText("Введите имя или оставьте как есть...");
-            sendMessage.setReplyMarkup(InlineButton.registrationButton());
+            editMessageText.setText("Введите имя или оставьте как есть...");
+            editMessageText.setReplyMarkup(InlineButton.registrationButton());
         }
-        return sendMessage;
+        user.setEditMessageText(editMessageText);
+        return user;
     }
 }

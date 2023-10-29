@@ -62,6 +62,9 @@ public class TelegramBot extends TelegramLongPollingBot {
             if(responseDto.getSendMessage() != null) {
                 execute(responseDto.getSendMessage());
             }
+            if(responseDto.getEditMessageText() != null) {
+                execute(responseDto.getEditMessageText());
+            }
             if(responseDto.getAnswerCallbackQuery() != null) {
                 execute(responseDto.getAnswerCallbackQuery());
             }

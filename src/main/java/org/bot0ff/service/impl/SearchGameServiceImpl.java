@@ -8,6 +8,7 @@ import org.bot0ff.service.SearchGameService;
 import org.bot0ff.service.UserService;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 
 import static org.bot0ff.entity.UserState.ONLINE;
 import static org.bot0ff.entity.UserState.SEARCH_GAME;
@@ -19,7 +20,7 @@ public class SearchGameServiceImpl implements SearchGameService {
     private final UserService userService;
 
     @Override
-    public SendMessage searchGame(User user, SendMessage sendMessage, String cmd) {
+    public User searchGame(User user, SendMessage sendMessage, String cmd) {
         if(cmd.equals("/newGameVsAI")) {
             user.setState(SEARCH_GAME);
             userService.saveUser(user);
@@ -36,23 +37,25 @@ public class SearchGameServiceImpl implements SearchGameService {
             sendMessage.setText("Выберите противника");
             sendMessage.setReplyMarkup(InlineButton.changeOptions());
         }
-        return sendMessage;
+        user.setSendMessage(sendMessage);
+        return user;
     }
 
     @Override
-    public SendMessage stopSearchGame(User user, SendMessage sendMessage, String cmd) {
+    public User stopSearchGame(User user, EditMessageText editMessageText, String cmd) {
         if(cmd.equals("/stopSearchGame")) {
             user.setState(ONLINE);
             userService.saveUser(user);
-            sendMessage.setText("""
+            editMessageText.setText("""
                     Поиск игры отменен.
                     Выберите противника для новой игры""");
-            sendMessage.setReplyMarkup(InlineButton.changeOptions());
+            editMessageText.setReplyMarkup(InlineButton.changeOptions());
         }
         else {
-            sendMessage.setText("Идет подготовка сражения...");
-            sendMessage.setReplyMarkup(InlineButton.stopSearchGameButton());
+            editMessageText.setText("Идет подготовка сражения...");
+            editMessageText.setReplyMarkup(InlineButton.stopSearchGameButton());
         }
-        return sendMessage;
+        user.setEditMessageText(editMessageText);
+        return user;
     }
 }

@@ -6,13 +6,11 @@ import org.bot0ff.component.button.InlineButton;
 import org.bot0ff.entity.User;
 import org.bot0ff.service.PrepareManuallyService;
 import org.bot0ff.service.UserService;
-import org.bot0ff.service.game.AutoPrepareService;
 import org.bot0ff.service.game.GameMessageService;
 import org.bot0ff.service.game.ManuallyPrepareService;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-
-import java.util.List;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 
 import static org.bot0ff.entity.UserState.ONLINE;
 import static org.bot0ff.entity.UserState.PREPARE_MANUALLY;
@@ -54,80 +52,21 @@ public class PrepareManuallyServiceImpl implements PrepareManuallyService {
 
     //ответы на inline запросы
     @Override
-    public SendMessage prepareGameManuallyInline(User user, SendMessage sendMessage, String cmd) {
+    public EditMessageText prepareGameManuallyInline(User user, EditMessageText editMessageText, String cmd) {
         if(cmd.equals("startManuallyPrepare")) {
             user.setState(PREPARE_MANUALLY);
-            var userGameFiled = manuallyPrepareService.getAutomaticGameFiled();
-            user.setGameFiled(userGameFiled);
             userService.saveUser(user);
-            sendMessage.setText("Четырех-палубный корабль...\n" + gameMessageService.getEmojiGameFiled(userGameFiled));
-            sendMessage.setReplyMarkup(InlineButton.confirmAutomaticPrepare());
+            editMessageText.setText("Ручная расстановка...");
+            editMessageText.setReplyMarkup(InlineButton.setManuallyPrepareShip(user));
         }
-        else if(cmd.equals("moveLeft")) {
-            user.setGameFiled(moveShip("left", user));
-        }
-        else if(cmd.equals("moveRight")) {
-            user.setGameFiled(moveShip("right", user));
-        }
-        else if(cmd.equals("rotateShip")) {
-            user.setGameFiled(moveShip("rotate", user));
-        }
-        else if(cmd.equals("moveUp")) {
-            user.setGameFiled(moveShip("up", user));
-        }
-        else if(cmd.equals("moveDown")) {
-            user.setGameFiled(moveShip("down", user));
-        }
-        else if(cmd.equals("setShip")) {
 
-        }
-        else if(cmd.equals("cancelShip")) {
-
-        }
         else {
-            sendMessage.setText("Идет расстановка кораблей");
+            editMessageText.setText("Идет расстановка кораблей");
             //TODO сделать продолжение текущей расстановки
         }
-        return sendMessage;
+        editMessageText.setMessageId(user.getMessageId());
+        editMessageText.setReplyMarkup(InlineButton.setManuallyPrepareShip(user));
+        return editMessageText;
     }
 
-    public List<String> moveShip(String direction, User user) {
-
-        if(user.getFourDeckShip() < 1) {
-            switch (direction) {
-                case "left" -> manuallyPrepareService.moveLeft(-1, user.getGameFiled());
-                case "right" -> manuallyPrepareService.moveRight(1, user.getGameFiled());
-                case "rotate" -> manuallyPrepareService.rotateShip(0, user.getGameFiled());
-                case "up" -> manuallyPrepareService.moveUp(-1, user.getGameFiled());
-                case "down" -> manuallyPrepareService.moveDown(1, user.getGameFiled());
-            }
-        }
-        else if(user.getThreeDeckShip() < 2) {
-            switch (direction) {
-                case "left" -> manuallyPrepareService.moveLeft(-1, user.getGameFiled());
-                case "right" -> manuallyPrepareService.moveRight(1, user.getGameFiled());
-                case "rotate" -> manuallyPrepareService.rotateShip(0, user.getGameFiled());
-                case "up" -> manuallyPrepareService.moveUp(-1, user.getGameFiled());
-                case "down" -> manuallyPrepareService.moveDown(1, user.getGameFiled());
-            }
-        }
-        else if(user.getTwoDeckShip() < 3) {
-            switch (direction) {
-                case "left" -> manuallyPrepareService.moveLeft(-1, user.getGameFiled());
-                case "right" -> manuallyPrepareService.moveRight(1, user.getGameFiled());
-                case "rotate" -> manuallyPrepareService.rotateShip(0, user.getGameFiled());
-                case "up" -> manuallyPrepareService.moveUp(-1, user.getGameFiled());
-                case "down" -> manuallyPrepareService.moveDown(1, user.getGameFiled());
-            }
-        }
-        else if(user.getOneDeckShip() < 1) {
-            switch (direction) {
-                case "left" -> manuallyPrepareService.moveLeft(-1, user.getGameFiled());
-                case "right" -> manuallyPrepareService.moveRight(1, user.getGameFiled());
-                case "rotate" -> manuallyPrepareService.rotateShip(0, user.getGameFiled());
-                case "up" -> manuallyPrepareService.moveUp(-1, user.getGameFiled());
-                case "down" -> manuallyPrepareService.moveDown(1, user.getGameFiled());
-            }
-        }
-    }
 }

@@ -2,8 +2,9 @@ package org.bot0ff.service;
 
 import org.bot0ff.entity.User;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 
 public interface RegistrationService {
-    SendMessage processRegistrationText(User user, SendMessage sendMessage, String cmd);
-    SendMessage processRegistrationInline(User user, SendMessage sendMessage, String cmd);
+    User processRegistrationText(User user, SendMessage sendMessage, String cmd);
+    User processRegistrationInline(User user, EditMessageText editMessageText, String cmd);
 }

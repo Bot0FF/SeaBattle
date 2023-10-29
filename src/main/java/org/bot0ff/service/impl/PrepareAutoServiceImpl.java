@@ -4,12 +4,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j;
 import org.bot0ff.component.button.InlineButton;
 import org.bot0ff.entity.User;
-import org.bot0ff.service.PrepareAutomaticService;
+import org.bot0ff.service.PrepareAutoService;
 import org.bot0ff.service.UserService;
 import org.bot0ff.service.game.AutoPrepareService;
 import org.bot0ff.service.game.GameMessageService;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 
 import static org.bot0ff.entity.UserState.*;
 import static org.bot0ff.service.ServiceCommands.*;
@@ -18,14 +19,14 @@ import static org.bot0ff.service.ServiceCommands.*;
 @Log4j
 @Service
 @RequiredArgsConstructor
-public class PrepareAutoServiceImpl implements PrepareAutomaticService {
+public class PrepareAutoServiceImpl implements PrepareAutoService {
     private final UserService userService;
     private final AutoPrepareService autoPrepareService;
     private final GameMessageService gameMessageService;
 
     //ответы на текстовые запросы
     @Override
-    public SendMessage optionsPrepareAutomaticText(User user, SendMessage sendMessage, String cmd) {
+    public User optionsPrepareAutomaticText(User user, SendMessage sendMessage, String cmd) {
         if(START.equals(cmd)) {
             sendMessage.setText("Автоматическая расстановка кораблей...");
             sendMessage.setReplyMarkup(InlineButton.startAutomaticPrepare());
@@ -43,24 +44,23 @@ public class PrepareAutoServiceImpl implements PrepareAutomaticService {
             sendMessage.setText("Автоматическая расстановка кораблей...");
             sendMessage.setReplyMarkup(InlineButton.startAutomaticPrepare());
         }
-        return sendMessage;
+        user.setSendMessage(sendMessage);
+        return user;
     }
 
     //ответы на inline запросы
     @Override
-    public SendMessage prepareGameAutomaticInline(User user, SendMessage sendMessage, String cmd) {
+    public User prepareGameAutomaticInline(User user, EditMessageText editMessageText, String cmd) {
         switch (cmd) {
             case "startAutomaticPrepare", "updateAutomaticPrepare" -> {
                 var userGameFiled = autoPrepareService.getAutomaticGameFiled();
                 user.setGameFiled(userGameFiled);
-                userService.saveUser(user);
-                sendMessage.setText("Продолжить с текущей расстановкой?\n" + gameMessageService.getEmojiGameFiled(userGameFiled));
-                sendMessage.setReplyMarkup(InlineButton.confirmAutomaticPrepare());
+                editMessageText.setText("Продолжить с текущей расстановкой?\n" + gameMessageService.getEmojiGameFiled(userGameFiled));
+                editMessageText.setReplyMarkup(InlineButton.confirmAutomaticPrepare());
             }
             case "confirmFindOpponent" -> {
                 user.setState(SEARCH_GAME);
-                userService.saveUser(user);
-                sendMessage.setText("Идет поиск противника...");
+                editMessageText.setText("Идет поиск противника...");
             }
             case "confirmGameVsAi" -> {
                 //set userAi
@@ -69,15 +69,15 @@ public class PrepareAutoServiceImpl implements PrepareAutomaticService {
                 //set User
                 user.setState(IN_GAME);
                 user.setActive(true);
-                userService.saveUser(user);
-                sendMessage.setText(gameMessageService.getCurrentGameFiled("Началась игра против ИИ\n Первый ход ваш...", user));
-                sendMessage.setReplyMarkup(InlineButton.charGameBoard());
+                editMessageText.setText(gameMessageService.getCurrentGameFiled("Началась игра против ИИ\n Первый ход ваш...", user));
+                editMessageText.setReplyMarkup(InlineButton.charGameBoard());
             }
             default -> {
-                sendMessage.setText("Автоматическая расстановка кораблей...");
-                sendMessage.setReplyMarkup(InlineButton.startAutomaticPrepare());
+                editMessageText.setText("Автоматическая расстановка кораблей...");
+                editMessageText.setReplyMarkup(InlineButton.startAutomaticPrepare());
             }
         }
-        return sendMessage;
+        user.setEditMessageText(editMessageText);
+        return user;
     }
 }

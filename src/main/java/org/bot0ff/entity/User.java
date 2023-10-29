@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -45,12 +47,12 @@ public class User {
     @Column(name = "is_active")
     private boolean isActive;
 
-    @Column(name = "one_deck_ship")
-    private int oneDeckShip;
-    @Column(name = "two_deck_ship")
-    private int twoDeckShip;
-    @Column(name = "three_deck_ship")
-    private int threeDeckShip;
-    @Column(name = "four_deck_ship")
-    private int fourDeckShip;
+    @Column(name = "messageId")
+    private Integer messageId;
+
+    @Transient
+    private SendMessage sendMessage;
+
+    @Transient
+    private EditMessageText editMessageText;
 }

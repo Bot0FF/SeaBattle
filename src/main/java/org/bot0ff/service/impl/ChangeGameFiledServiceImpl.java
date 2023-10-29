@@ -8,6 +8,7 @@ import org.bot0ff.service.ChangeGameFiledService;
 import org.bot0ff.service.UserService;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 
 import static org.bot0ff.entity.UserState.*;
 import static org.bot0ff.service.ServiceCommands.*;
@@ -21,7 +22,7 @@ public class ChangeGameFiledServiceImpl implements ChangeGameFiledService {
 
     //ответы на текстовые запросы
     @Override
-    public SendMessage optionsPrepareGameText(User user, SendMessage sendMessage, String cmd) {
+    public User optionsPrepareGameText(User user, SendMessage sendMessage, String cmd) {
         if(START.equals(cmd)) {
             sendMessage.setText("Расстановка кораблей...");
             sendMessage.setReplyMarkup(InlineButton.changePlacementOption());
@@ -39,28 +40,30 @@ public class ChangeGameFiledServiceImpl implements ChangeGameFiledService {
             sendMessage.setText("Расстановка кораблей...");
             sendMessage.setReplyMarkup(InlineButton.changePlacementOption());
         }
-        return sendMessage;
+        user.setSendMessage(sendMessage);
+        return user;
     }
 
     //ответы на inline запросы
     @Override
-    public SendMessage optionsPrepareGameInline(User user, SendMessage sendMessage, String cmd) {
+    public User optionsPrepareGameInline(User user, EditMessageText editMessageText, String cmd) {
         if(cmd.equals("prepareManually")) {
             user.setState(PREPARE_MANUALLY);
             userService.saveUser(user);
-            sendMessage.setText("Ручная расстановка кораблей...");
-            sendMessage.setReplyMarkup(InlineButton.startManuallyPrepare());
+            editMessageText.setText("Ручная расстановка кораблей...");
+            editMessageText.setReplyMarkup(InlineButton.startManuallyPrepare());
         }
         else if(cmd.equals("prepareAutomatic")) {
             user.setState(PREPARE_AUTOMATIC);
             userService.saveUser(user);
-            sendMessage.setText("Автоматическая расстановка кораблей...");
-            sendMessage.setReplyMarkup(InlineButton.startAutomaticPrepare());
+            editMessageText.setText("Автоматическая расстановка кораблей...");
+            editMessageText.setReplyMarkup(InlineButton.startAutomaticPrepare());
         }
         else {
-            sendMessage.setText("Расстановка кораблей...");
-            sendMessage.setReplyMarkup(InlineButton.changePlacementOption());
+            editMessageText.setText("Расстановка кораблей...");
+            editMessageText.setReplyMarkup(InlineButton.changePlacementOption());
         }
-        return sendMessage;
+        user.setEditMessageText(editMessageText);
+        return user;
     }
 }

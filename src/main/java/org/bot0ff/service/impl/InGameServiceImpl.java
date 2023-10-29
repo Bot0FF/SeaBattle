@@ -12,6 +12,7 @@ import org.bot0ff.service.game.GameService;
 import org.bot0ff.service.game.GameMessageService;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import static org.bot0ff.entity.UserState.ONLINE;
@@ -30,7 +31,7 @@ public class InGameServiceImpl implements InGameService {
 
     //ответы на текстовые запросы
     @Override
-    public SendMessage processTextMessage(Update update, User user, SendMessage sendMessage, String cmd) {
+    public User processTextMessage(Update update, User user, SendMessage sendMessage, String cmd) {
         if(CANCEL.equals(cmd)) {
             user.setState(ONLINE);
             userService.saveUser(user);
@@ -54,50 +55,51 @@ public class InGameServiceImpl implements InGameService {
                 userAiController.userAiAction(update, user);
             }
         }
-        return sendMessage;
+        user.setSendMessage(sendMessage);
+        return user;
     }
 
     //ответы на inline запросы
     @Override
-    public SendMessage processCallbackQuery(Update update, User user, SendMessage sendMessage, String cmd) {
+    public User processCallbackQuery(Update update, User user, EditMessageText editMessageText, String cmd) {
         if(user.isActive() & cmd.matches("[А-К]") & user.getChangeTarget().isEmpty()) {
             user.setChangeTarget(cmd);
-            userService.saveUser(user);
-            sendMessage.setText(gameMessageService.getCurrentGameFiled("Ваш ход...", user));
-            sendMessage.setReplyMarkup(InlineButton.numGameBoard());
+            editMessageText.setText(gameMessageService.getCurrentGameFiled("Ваш ход...", user));
+            editMessageText.setReplyMarkup(InlineButton.numGameBoard());
         }
         else if(user.isActive() & cmd.matches("[1-9]|10") & !user.getChangeTarget().isEmpty()) {
             var userChangeTarget = user.getChangeTarget() + ":" + cmd;
             var checkStepUser = gameService.checkUserStep(userChangeTarget, user);
             if(checkStepUser == 1) {
-                sendMessage.setText(gameMessageService.getCurrentGameFiled("Вы попали! Ваш ход...", user));
-                sendMessage.setReplyMarkup(InlineButton.charGameBoard());
+                editMessageText.setText(gameMessageService.getCurrentGameFiled("Вы попали! Ваш ход...", user));
+                editMessageText.setReplyMarkup(InlineButton.charGameBoard());
             }
             else if(checkStepUser == 0) {
-                sendMessage.setText(gameMessageService.getCurrentGameFiled("Вы не попали! Ход противника...", user));
+                editMessageText.setText(gameMessageService.getCurrentGameFiled("Вы не попали! Ход противника...", user));
                 userAiController.userAiAction(update, user);
             }
             else {
-                sendMessage.setText("Победа!");
+                editMessageText.setText("Победа!");
                 endGameController.endGame(update);
             }
         }
         else {
             if(user.isActive()) {
                 if(user.getChangeTarget().isEmpty()) {
-                    sendMessage.setText(gameMessageService.getCurrentGameFiled("Ваш ход", user));
-                    sendMessage.setReplyMarkup(InlineButton.charGameBoard());
+                    editMessageText.setText(gameMessageService.getCurrentGameFiled("Ваш ход", user));
+                    editMessageText.setReplyMarkup(InlineButton.charGameBoard());
                 }
                 else {
-                    sendMessage.setText(gameMessageService.getCurrentGameFiled("Ваш ход", user));
-                    sendMessage.setReplyMarkup(InlineButton.numGameBoard());
+                    editMessageText.setText(gameMessageService.getCurrentGameFiled("Ваш ход", user));
+                    editMessageText.setReplyMarkup(InlineButton.numGameBoard());
                 }
             }
             else {
-                sendMessage.setText("Идет сражение...");
+                editMessageText.setText("Идет сражение...");
                 userAiController.userAiAction(update, user);
             }
         }
-        return sendMessage;
+        user.setEditMessageText(editMessageText);
+        return user;
     }
 }

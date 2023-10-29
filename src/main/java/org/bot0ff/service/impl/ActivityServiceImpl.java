@@ -8,6 +8,7 @@ import org.bot0ff.service.ActivityService;
 import org.bot0ff.service.UserService;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 
 import static org.bot0ff.entity.UserState.*;
 import static org.bot0ff.service.ServiceCommands.*;
@@ -21,7 +22,7 @@ public class ActivityServiceImpl implements ActivityService {
 
     //ответы на текстовые запросы
     @Override
-    public SendMessage changeOptionsFromMenu(User user, SendMessage sendMessage, String cmd) {
+    public User changeOptionsFromMenu(User user, SendMessage sendMessage, String cmd) {
         if(START.equals(cmd)) {
             sendMessage.setText("Выберите действие, " + user.getName());
             sendMessage.setReplyMarkup(InlineButton.changeOptions());
@@ -37,22 +38,24 @@ public class ActivityServiceImpl implements ActivityService {
             sendMessage.setText("Выберите действие, " + user.getName());
             sendMessage.setReplyMarkup(InlineButton.changeOptions());
         }
-        return sendMessage;
+        user.setSendMessage(sendMessage);
+        return user;
     }
 
     //ответы на inline запросы
     @Override
-    public SendMessage changeOptions(User user, SendMessage sendMessage, String cmd) {
+    public User changeOptions(User user, EditMessageText editMessageText, String cmd) {
         if(cmd.equals("newGame")) {
             user.setState(CHANGE_GAME_FILED);
             userService.saveUser(user);
-            sendMessage.setText("Расстановка кораблей...");
-            sendMessage.setReplyMarkup(InlineButton.changePlacementOption());
+            editMessageText.setText("Расстановка кораблей...");
+            editMessageText.setReplyMarkup(InlineButton.changePlacementOption());
         }
         else {
-            sendMessage.setText("Выберите действие, " + user.getName());
-            sendMessage.setReplyMarkup(InlineButton.changeOptions());
+            editMessageText.setText("Выберите действие, " + user.getName());
+            editMessageText.setReplyMarkup(InlineButton.changeOptions());
         }
-        return sendMessage;
+        user.setEditMessageText(editMessageText);
+        return user;
     }
 }

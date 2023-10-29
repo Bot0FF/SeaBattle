@@ -39,10 +39,10 @@ public class AutoPrepareService {
             }
         }
 
-//        getShips(4);
-//
-//        getShips(3);
-//        getShips(3);
+        getShips(4);
+
+        getShips(3);
+        getShips(3);
 //
 //        getShips(2);
 //        getShips(2);
@@ -51,7 +51,7 @@ public class AutoPrepareService {
 //        getShips(1);
 //        getShips(1);
 //        getShips(1);
-        getShips(1);
+//        getShips(1);
 
         //заполняет оставшиеся координаты в поле
         for(int ver = 0; ver < GAME_FILED_LENGTH; ver++) { //буквы по вертикали
