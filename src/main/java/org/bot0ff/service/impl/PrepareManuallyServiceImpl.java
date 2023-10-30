@@ -15,8 +15,7 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageTe
 
 import java.util.HashMap;
 
-import static org.bot0ff.entity.UserState.ONLINE;
-import static org.bot0ff.entity.UserState.PREPARE_MANUALLY;
+import static org.bot0ff.entity.UserState.*;
 import static org.bot0ff.service.ServiceCommands.*;
 import static org.bot0ff.util.Constants.GAME_FILED_LENGTH;
 
@@ -62,29 +61,12 @@ public class PrepareManuallyServiceImpl implements PrepareManuallyService {
             user.setState(PREPARE_MANUALLY);
             ManuallyPrepareService.prepareManuallyMap.put(user.getId(), UserFiled.builder()
                     .userFiled(new int[GAME_FILED_LENGTH][GAME_FILED_LENGTH])
-                    .countOneDeckShip(0)
-                    .countTwoDeckShip(0)
-                    .countThreeDeckShip(0)
-                    .countFourDeckShip(0)
+                    .countShips(0)
                     .build());
             editMessageText.setText("Ручная расстановка...");
             editMessageText.setReplyMarkup(InlineButton.setManuallyPrepareShip(user));
         }
         else if(cmd.matches("[0-9]:[0-9]")) {
-            for(int ver = 0; ver < GAME_FILED_LENGTH; ver++) {
-                for(int hor = 0; hor < GAME_FILED_LENGTH; hor++) {
-                    if(ManuallyPrepareService.prepareManuallyMap.get(user.getId()).getUserFiled()[ver][hor] == 1) {
-                        System.out.print("X");
-                    }
-                    else if(ManuallyPrepareService.prepareManuallyMap.get(user.getId()).getUserFiled()[ver][hor] == 1) {
-                        System.out.print("o");
-                    }
-                    else {
-                        System.out.print("_");
-                    }
-                }
-                System.out.println();
-            }
             String[] split = cmd.split(":");
             if(ManuallyPrepareService.prepareManuallyMap.get(user.getId()).getUserFiled()[Integer.parseInt(split[0])][Integer.parseInt(split[1])] == 2) {
                 return null;
@@ -92,6 +74,16 @@ public class PrepareManuallyServiceImpl implements PrepareManuallyService {
             manuallyPrepareService.setUserFiled(user, cmd);
             editMessageText.setText("Идет расстановка кораблей...(test)");
             editMessageText.setReplyMarkup(InlineButton.setManuallyPrepareShip(user));
+        }
+        else if(cmd.equals("confirmPrepare")) {
+            if(manuallyPrepareService.confirmPrepare(user)) {
+                user.setState(SEARCH_GAME);
+                editMessageText.setText("Поиск противника...");
+            }
+            else {
+                editMessageText.setText("Неверно расставлены корабли...");
+                editMessageText.setReplyMarkup(InlineButton.setManuallyPrepareShip(user));
+            }
         }
         else {
             editMessageText.setText("Идет расстановка кораблей...");

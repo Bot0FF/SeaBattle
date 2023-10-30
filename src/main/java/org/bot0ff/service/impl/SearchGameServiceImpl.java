@@ -9,15 +9,33 @@ import org.bot0ff.service.UserService;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
+import org.telegram.telegrambots.meta.api.objects.Update;
 
 import static org.bot0ff.entity.UserState.ONLINE;
 import static org.bot0ff.entity.UserState.SEARCH_GAME;
+import static org.bot0ff.service.ServiceCommands.CANCEL;
+import static org.bot0ff.service.ServiceCommands.HELP;
 
 @Log4j
 @Service
 @RequiredArgsConstructor
 public class SearchGameServiceImpl implements SearchGameService {
     private final UserService userService;
+
+    //ответы на текстовые запросы
+    @Override
+    public User searchGameText(User user, SendMessage sendMessage, String cmd) {
+        if(CANCEL.equals(cmd)) {
+            user.setState(ONLINE);
+            sendMessage.setText("Сброс настроек игры...\nВыберите действие, " + user.getName());
+            sendMessage.setReplyMarkup(InlineButton.changeOptions());
+        }
+        else if(HELP.equals(cmd)) {
+            sendMessage.setText("Помощь");
+        }
+        user.setSendMessage(sendMessage);
+        return user;
+    }
 
     @Override
     public User searchGame(User user, SendMessage sendMessage, String cmd) {

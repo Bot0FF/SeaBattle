@@ -10,8 +10,5 @@ import java.util.Map;
 public class UserFiled {
     int[][] userFiled;
 
-    int countOneDeckShip;
-    int countTwoDeckShip;
-    int countThreeDeckShip;
-    int countFourDeckShip;
+    int countShips;
 }

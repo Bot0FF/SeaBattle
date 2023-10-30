@@ -92,4 +92,27 @@ public class ManuallyPrepareService {
             userFiledArr[(ver + 1)][(hor + 1)] = 0; //клетка справа снизу
         }
     }
+
+    public boolean confirmPrepare(User user) {
+        int[][] userFiledArr = ManuallyPrepareService.prepareManuallyMap.get(user.getId()).getUserFiled();
+        var result = 0;
+
+        for(int ver = 0; ver < GAME_FILED_LENGTH; ver++) {
+            for(int hor = 0; hor < GAME_FILED_LENGTH; hor++) {
+                if(userFiledArr[ver][hor] == 1) {
+                    boolean isNewShip = checkIsNewShip(userFiledArr, ver, hor);
+                    if(isNewShip) {
+                        result++;
+                    }
+                }
+            }
+        }
+
+        return result == 10;
+    }
+
+    private boolean checkIsNewShip(int[][] userFiled, int ver, int hor) {
+        return !((ver > 0 && userFiled[ver - 1][hor] == 1)
+                | (hor > 0 && userFiled[ver][hor - 1] == 1));
+    }
 }

@@ -114,7 +114,7 @@ public class InlineButton {
     public static InlineKeyboardMarkup setManuallyPrepareShip(User user) {
         int[][] tempUserFiled = ManuallyPrepareService.prepareManuallyMap.get(user.getId()).getUserFiled();
         List<List<InlineKeyboardButton>> listButton = new ArrayList<>();
-        listButton.add(new ArrayList<>());
+
 
         for(int ver = 0; ver < GAME_FILED_LENGTH; ver++) {
             for(int hor = 0; hor < GAME_FILED_LENGTH; hor++) {
@@ -135,6 +135,13 @@ public class InlineButton {
                 listButton.get(ver).add(thingButton);
             }
         }
+
+        List<InlineKeyboardButton> autoButton = new ArrayList<>();
+        autoButton.add(new InlineKeyboardButton("Автоматически"));
+        autoButton.add(new InlineKeyboardButton("Подтвердить"));
+        autoButton.get(0).setCallbackData("autoPrepare");
+        autoButton.get(1).setCallbackData("confirmPrepare");
+        listButton.add(listButton.size(), autoButton);
 
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
         markupInline.setKeyboard(listButton);
