@@ -17,6 +17,10 @@ public class GameMessageService {
     private final String success = EmojiParser.parseToUnicode(":anchor:");
     private final String miss = EmojiParser.parseToUnicode(":mag:");
 
+    public static String emojiPars(String emojiName) {
+        return EmojiParser.parseToUnicode(emojiName);
+    }
+
     public String emojiParser(String emojiName) {
         return EmojiParser.parseToUnicode(emojiName);
     }

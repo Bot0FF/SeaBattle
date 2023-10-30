@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.bot0ff.entity.User;
 import org.bot0ff.service.game.GameMessageService;
+import org.bot0ff.service.game.ManuallyPrepareService;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
@@ -17,7 +18,6 @@ import static org.bot0ff.util.Constants.GAME_FILED_LENGTH;
 @Component
 @RequiredArgsConstructor
 public class InlineButton {
-    private final GameMessageService gameMessageService;
 
     //оставить имя как есть при регистрации
     public static InlineKeyboardMarkup registrationButton() {
@@ -112,18 +112,7 @@ public class InlineButton {
 
     //управление расстановкой кораблей
     public static InlineKeyboardMarkup setManuallyPrepareShip(User user) {
-        int[][] tempUserFiled = new int[GAME_FILED_LENGTH][GAME_FILED_LENGTH];
-        for(String coordinates : user.getGameFiled()) {
-            String[] split;
-            if(coordinates.contains(":")) {
-                split = coordinates.split(":");
-                tempUserFiled[Integer.parseInt(split[0])][Integer.parseInt(split[1])] = 1;
-            }
-            else if(coordinates.contains("-")) {
-                split = coordinates.split("-");
-                tempUserFiled[Integer.parseInt(split[0])][Integer.parseInt(split[1])] = 2;
-            }
-        }
+        int[][] tempUserFiled = ManuallyPrepareService.prepareManuallyMap.get(user.getId()).getUserFiled();
         List<List<InlineKeyboardButton>> listButton = new ArrayList<>();
         listButton.add(new ArrayList<>());
 
@@ -132,8 +121,17 @@ public class InlineButton {
                 if(hor == 0) {
                     listButton.add(new ArrayList<>());
                 }
-                InlineKeyboardButton thingButton = new InlineKeyboardButton(" ");
-                thingButton.setCallbackData("data");
+                InlineKeyboardButton thingButton = new InlineKeyboardButton();
+                if(tempUserFiled[ver][hor] == 1) {
+                    thingButton.setText(GameMessageService.emojiPars(":sailboat:"));
+                }
+                else if(tempUserFiled[ver][hor] == 2){
+                    thingButton.setText(GameMessageService.emojiPars(":anchor:"));
+                }
+                else {
+                    thingButton.setText(" ");
+                }
+                thingButton.setCallbackData(ver + ":" + hor);
                 listButton.get(ver).add(thingButton);
             }
         }

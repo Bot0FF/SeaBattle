@@ -26,18 +26,10 @@ import static org.bot0ff.util.Constants.GAME_FILED_LENGTH;
 @Service
 @RequiredArgsConstructor
 public class AutoPrepareService {
-
     private List<String> resultFiled;
-    private int[][] prepareFiled;
 
     public List<String> getAutomaticGameFiled() {
         resultFiled = new ArrayList<>();
-        prepareFiled = new int[GAME_FILED_LENGTH][GAME_FILED_LENGTH];
-        for(int ver = 0; ver < GAME_FILED_LENGTH; ver++) { //буквы по вертикали
-            for(int hor = 0; hor < GAME_FILED_LENGTH; hor++) { //цифры по горизонтали
-                prepareFiled[ver][hor] = 0;
-            }
-        }
 
         getShips(4);
 
@@ -67,10 +59,18 @@ public class AutoPrepareService {
         return resultFiled;
     }
 
-    private void getShips(int shipLength) {
+    public void getShips(int shipLength) {
+        int[][] tempArrFiled = new int[GAME_FILED_LENGTH][GAME_FILED_LENGTH];
         int vertOrHor = getR0Or1();
         int pointHorizontal = 0;
         int pointVertical = 0;
+
+        for(int ver = 0; ver < GAME_FILED_LENGTH; ver++) { //буквы по вертикали
+            for(int hor = 0; hor < GAME_FILED_LENGTH; hor++) { //цифры по горизонтали
+                tempArrFiled[ver][hor] = 0;
+            }
+        }
+
         if(vertOrHor == 0) {
             //вертикальное расположение
             if(shipLength == 4) {
@@ -78,10 +78,10 @@ public class AutoPrepareService {
                     pointHorizontal = getRNum(0);
                     pointVertical = getRNum(shipLength);
                 }
-                while (!(prepareFiled[pointVertical][pointHorizontal] == 0
-                        & prepareFiled[pointVertical + 1][pointHorizontal] == 0
-                        & prepareFiled[pointVertical + 2][pointHorizontal] == 0
-                        & prepareFiled[pointVertical + 3][pointHorizontal] == 0));
+                while (!(tempArrFiled[pointVertical][pointHorizontal] == 0
+                        & tempArrFiled[pointVertical + 1][pointHorizontal] == 0
+                        & tempArrFiled[pointVertical + 2][pointHorizontal] == 0
+                        & tempArrFiled[pointVertical + 3][pointHorizontal] == 0));
 
             }
             else if(shipLength == 3) {
@@ -89,52 +89,52 @@ public class AutoPrepareService {
                     pointHorizontal = getRNum(0);
                     pointVertical = getRNum(shipLength);
                 }
-                while (!(prepareFiled[pointVertical][pointHorizontal] == 0
-                        & prepareFiled[pointVertical + 1][pointHorizontal] == 0
-                        & prepareFiled[pointVertical + 2][pointHorizontal] == 0));
+                while (!(tempArrFiled[pointVertical][pointHorizontal] == 0
+                        & tempArrFiled[pointVertical + 1][pointHorizontal] == 0
+                        & tempArrFiled[pointVertical + 2][pointHorizontal] == 0));
             }
             else if(shipLength == 2) {
                 do {
                     pointHorizontal = getRNum(0);
                     pointVertical = getRNum(shipLength);
                 }
-                while (!(prepareFiled[pointVertical][pointHorizontal] == 0
-                        & prepareFiled[pointVertical + 1][pointHorizontal] == 0));
+                while (!(tempArrFiled[pointVertical][pointHorizontal] == 0
+                        & tempArrFiled[pointVertical + 1][pointHorizontal] == 0));
             }
             else if(shipLength == 1) {
                 do {
                     pointHorizontal = getRNum(0);
                     pointVertical = getRNum(shipLength);
                 }
-                while (!(prepareFiled[pointVertical][pointHorizontal] == 0));
+                while (!(tempArrFiled[pointVertical][pointHorizontal] == 0));
             }
 
             if(pointVertical > 0) {
-                this.prepareFiled[(pointVertical - 1)][pointHorizontal] = 1;
+                tempArrFiled[(pointVertical - 1)][pointHorizontal] = 1;
             }
             if(pointVertical > 0 & pointHorizontal > 0) {
-                this.prepareFiled[(pointVertical - 1)][(pointHorizontal - 1)] = 1;
+                tempArrFiled[(pointVertical - 1)][(pointHorizontal - 1)] = 1;
             }
             if(pointVertical > 0 & pointHorizontal < (GAME_FILED_LENGTH - 1)) {
-                this.prepareFiled[(pointVertical - 1)][(pointHorizontal + 1)] = 1;
+                tempArrFiled[(pointVertical - 1)][(pointHorizontal + 1)] = 1;
             }
             if((pointVertical + shipLength - 1) < (GAME_FILED_LENGTH - 1)) {
-                this.prepareFiled[(pointVertical + shipLength)][pointHorizontal] = 1;
+                tempArrFiled[(pointVertical + shipLength)][pointHorizontal] = 1;
             }
             if((pointVertical + shipLength - 1) < (GAME_FILED_LENGTH - 1) & pointHorizontal > 0) {
-                this.prepareFiled[(pointVertical + shipLength)][(pointHorizontal - 1)] = 1;
+                tempArrFiled[(pointVertical + shipLength)][(pointHorizontal - 1)] = 1;
             }
             if((pointVertical + shipLength - 1) < (GAME_FILED_LENGTH - 1) & pointHorizontal < (GAME_FILED_LENGTH - 1)) {
-                this.prepareFiled[(pointVertical + shipLength)][(pointHorizontal + 1)] = 1;
+                tempArrFiled[(pointVertical + shipLength)][(pointHorizontal + 1)] = 1;
             }
             for(int ver = pointVertical; ver < pointVertical + shipLength; ver++) {
                 if(pointHorizontal > 0) {
-                    this.prepareFiled[ver][(pointHorizontal - 1)] = 1;
+                    tempArrFiled[ver][(pointHorizontal - 1)] = 1;
                 }
                 if(pointHorizontal < (GAME_FILED_LENGTH - 1)) {
-                    this.prepareFiled[ver][(pointHorizontal + 1)] = 1;
+                    tempArrFiled[ver][(pointHorizontal + 1)] = 1;
                 }
-                this.prepareFiled[ver][pointHorizontal] = 2;
+                tempArrFiled[ver][pointHorizontal] = 2;
                 this.resultFiled.add(ver + ":" + pointHorizontal);
             }
         }
@@ -145,62 +145,62 @@ public class AutoPrepareService {
                     pointHorizontal = getRNum(shipLength);
                     pointVertical = getRNum(0);
                 }
-                while (!(prepareFiled[pointVertical][pointHorizontal] == 0
-                        & prepareFiled[pointVertical][pointHorizontal + 1] == 0
-                        & prepareFiled[pointVertical][pointHorizontal + 2] == 0
-                        & prepareFiled[pointVertical][pointHorizontal + 3] == 0));
+                while (!(tempArrFiled[pointVertical][pointHorizontal] == 0
+                        & tempArrFiled[pointVertical][pointHorizontal + 1] == 0
+                        & tempArrFiled[pointVertical][pointHorizontal + 2] == 0
+                        & tempArrFiled[pointVertical][pointHorizontal + 3] == 0));
             }
             else if(shipLength == 3) {
                 do {
                     pointHorizontal = getRNum(shipLength);
                     pointVertical = getRNum(0);
                 }
-                while (!(prepareFiled[pointVertical][pointHorizontal] == 0
-                        & prepareFiled[pointVertical][pointHorizontal + 1] == 0
-                        & prepareFiled[pointVertical][pointHorizontal + 2] == 0));
+                while (!(tempArrFiled[pointVertical][pointHorizontal] == 0
+                        & tempArrFiled[pointVertical][pointHorizontal + 1] == 0
+                        & tempArrFiled[pointVertical][pointHorizontal + 2] == 0));
             }
             else if(shipLength == 2) {
                 do {
                     pointHorizontal = getRNum(shipLength);
                     pointVertical = getRNum(0);
                 }
-                while (!(prepareFiled[pointVertical][pointHorizontal] == 0
-                        & prepareFiled[pointVertical][pointHorizontal + 1] == 0));
+                while (!(tempArrFiled[pointVertical][pointHorizontal] == 0
+                        & tempArrFiled[pointVertical][pointHorizontal + 1] == 0));
             }
             else if(shipLength == 1) {
                 do {
                     pointHorizontal = getRNum(shipLength);
                     pointVertical = getRNum(0);
                 }
-                while (!(prepareFiled[pointVertical][pointHorizontal] == 0));
+                while (!(tempArrFiled[pointVertical][pointHorizontal] == 0));
             }
 
             if(pointHorizontal > 0) {
-                this.prepareFiled[pointVertical][(pointHorizontal - 1)] = 1;
+                tempArrFiled[pointVertical][(pointHorizontal - 1)] = 1;
             }
             if(pointHorizontal > 0 & pointVertical > 0) {
-                this.prepareFiled[(pointVertical - 1)][(pointHorizontal - 1)] = 1;
+                tempArrFiled[(pointVertical - 1)][(pointHorizontal - 1)] = 1;
             }
             if(pointHorizontal > 0 & pointVertical < (GAME_FILED_LENGTH - 1)) {
-                this.prepareFiled[(pointVertical + 1)][(pointHorizontal - 1)] = 1;
+                tempArrFiled[(pointVertical + 1)][(pointHorizontal - 1)] = 1;
             }
             if((pointHorizontal + shipLength - 1) < (GAME_FILED_LENGTH - 1)) {
-                this.prepareFiled[pointVertical][(pointHorizontal + shipLength)] = 1;
+                tempArrFiled[pointVertical][(pointHorizontal + shipLength)] = 1;
             }
             if((pointHorizontal + shipLength - 1) < (GAME_FILED_LENGTH - 1) & pointVertical > 0) {
-                this.prepareFiled[(pointVertical - 1)][(pointHorizontal + shipLength)] = 1;
+                tempArrFiled[(pointVertical - 1)][(pointHorizontal + shipLength)] = 1;
             }
             if((pointHorizontal + shipLength - 1) < (GAME_FILED_LENGTH - 1) & pointVertical < (GAME_FILED_LENGTH - 1)) {
-                this.prepareFiled[(pointVertical + 1)][(pointHorizontal + shipLength)] = 1;
+                tempArrFiled[(pointVertical + 1)][(pointHorizontal + shipLength)] = 1;
             }
             for(int hor = pointHorizontal; hor < pointHorizontal + shipLength; hor++) {
                 if(pointVertical > 0) {
-                    this.prepareFiled[(pointVertical - 1)][hor] = 1;
+                    tempArrFiled[(pointVertical - 1)][hor] = 1;
                 }
                 if(pointVertical < (GAME_FILED_LENGTH - 1)) {
-                    this.prepareFiled[(pointVertical + 1)][hor] = 1;
+                    tempArrFiled[(pointVertical + 1)][hor] = 1;
                 }
-                this.prepareFiled[pointVertical][hor] = 2;
+                tempArrFiled[pointVertical][hor] = 2;
                 this.resultFiled.add(pointVertical + ":" + hor);
             }
         }
