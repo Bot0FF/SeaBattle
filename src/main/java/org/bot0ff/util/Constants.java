@@ -8,5 +8,5 @@ public class Constants {
     //4 - четырехпалубный
     //5 - занятая клетка вокруг корабля, с возможностью продолжения корабля
     //6 - занятая клетка вокруг корабля, с невозможностью нажатия на нее
-    public static int GAME_FILED_LENGTH = 10;
+    public static int GAME_FILED_LENGTH = 8;
 }
