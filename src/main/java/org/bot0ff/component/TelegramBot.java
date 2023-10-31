@@ -69,7 +69,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                 execute(responseDto.getAnswerCallbackQuery());
             }
         } catch (TelegramApiException e) {
-            e.printStackTrace();
+             e.printStackTrace();
         }
 
     }

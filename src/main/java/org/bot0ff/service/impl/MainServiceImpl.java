@@ -79,7 +79,7 @@ public class MainServiceImpl implements MainService {
             telegramBot.sendAnswer(response);
         }
         else if(SEARCH_GAME.equals(userState)) {
-            var updateUser = searchGameService.searchGame(user, sendMessage, inputMessage);
+            var updateUser = searchGameService.searchGameText(user, sendMessage, inputMessage);
             var response = ResponseDto.builder()
                     .telegramBot(telegramBot)
                     .sendMessage(updateUser.getSendMessage())

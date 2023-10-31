@@ -13,8 +13,6 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 
-import java.util.HashMap;
-
 import static org.bot0ff.entity.UserState.*;
 import static org.bot0ff.service.ServiceCommands.*;
 import static org.bot0ff.util.Constants.GAME_FILED_LENGTH;
@@ -67,16 +65,20 @@ public class PrepareManuallyServiceImpl implements PrepareManuallyService {
             editMessageText.setReplyMarkup(InlineButton.setManuallyPrepareShip(user));
         }
         else if(cmd.matches("[0-9]:[0-9]")) {
+            int result;
             String[] split = cmd.split(":");
-            if(ManuallyPrepareService.prepareManuallyMap.get(user.getId()).getUserFiled()[Integer.parseInt(split[0])][Integer.parseInt(split[1])] == 2) {
+            result = manuallyPrepareService.setUserFiled(user, cmd);
+            int currentCoordinate = ManuallyPrepareService.prepareManuallyMap.get(user.getId()).getUserFiled()[Integer.parseInt(split[0])][Integer.parseInt(split[1])];
+            if(result == 6 | currentCoordinate == 6) {
                 return null;
             }
-            manuallyPrepareService.setUserFiled(user, cmd);
-            editMessageText.setText("Идет расстановка кораблей...(test)");
-            editMessageText.setReplyMarkup(InlineButton.setManuallyPrepareShip(user));
+            else  {
+                editMessageText.setText("Идет расстановка кораблей...(test)");
+                editMessageText.setReplyMarkup(InlineButton.setManuallyPrepareShip(user));
+            }
         }
         else if(cmd.equals("confirmPrepare")) {
-            if(manuallyPrepareService.confirmPrepare(user)) {
+            if(manuallyPrepareService.countShip(user) & manuallyPrepareService.countSquare(user)) {
                 user.setState(SEARCH_GAME);
                 editMessageText.setText("Поиск противника...");
             }

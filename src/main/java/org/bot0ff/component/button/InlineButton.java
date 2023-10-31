@@ -126,6 +126,18 @@ public class InlineButton {
                     thingButton.setText(GameMessageService.emojiPars(":sailboat:"));
                 }
                 else if(tempUserFiled[ver][hor] == 2){
+                    thingButton.setText(GameMessageService.emojiPars(":speedboat:"));
+                }
+                else if(tempUserFiled[ver][hor] == 3){
+                    thingButton.setText(GameMessageService.emojiPars(":ferry:"));
+                }
+                else if(tempUserFiled[ver][hor] == 4){
+                    thingButton.setText(GameMessageService.emojiPars(":ship:"));
+                }
+                else if(tempUserFiled[ver][hor] == 5){
+                    thingButton.setText(GameMessageService.emojiPars(":anchor:"));
+                }
+                else if(tempUserFiled[ver][hor] == 6){
                     thingButton.setText(GameMessageService.emojiPars(":anchor:"));
                 }
                 else {
