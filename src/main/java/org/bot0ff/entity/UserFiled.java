@@ -9,6 +9,4 @@ import java.util.Map;
 @Builder
 public class UserFiled {
     int[][] userFiled;
-
-    int countShips;
 }

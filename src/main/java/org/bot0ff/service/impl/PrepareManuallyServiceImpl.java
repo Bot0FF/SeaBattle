@@ -59,7 +59,6 @@ public class PrepareManuallyServiceImpl implements PrepareManuallyService {
             user.setState(PREPARE_MANUALLY);
             ManuallyPrepareService.prepareManuallyMap.put(user.getId(), UserFiled.builder()
                     .userFiled(new int[GAME_FILED_LENGTH][GAME_FILED_LENGTH])
-                    .countShips(0)
                     .build());
             editMessageText.setText("Ручная расстановка...");
             editMessageText.setReplyMarkup(InlineButton.setManuallyPrepareShip(user));
@@ -78,7 +77,7 @@ public class PrepareManuallyServiceImpl implements PrepareManuallyService {
             }
         }
         else if(cmd.equals("confirmPrepare")) {
-            if(manuallyPrepareService.countShip(user) & manuallyPrepareService.countSquare(user)) {
+            if(manuallyPrepareService.countShips(user)) {
                 user.setState(SEARCH_GAME);
                 editMessageText.setText("Поиск противника...");
             }
