@@ -157,27 +157,49 @@ public class ManuallyPrepareService {
 
     public void removeShip(User user, int ver, int hor) {
         int[][] userFiledArr = ManuallyPrepareService.prepareManuallyMap.get(user.getId()).getUserFiled();
+        userFiledArr[ver][hor] = 0;
 
-        //если нажатие по однопалубному кораблю
-        if(userFiledArr[ver][hor] == 1) {
-            userFiledArr[ver][hor] = 0;
+        //удаляет верхнюю часть корабля
+        if (ver > 0 && (userFiledArr[ver - 1][hor] == 2 | userFiledArr[ver - 1][hor] == 3 | userFiledArr[ver - 1][hor] == 4)) {
+            userFiledArr[ver - 1][hor] = 0;
+            if (ver > 1 && (userFiledArr[ver - 2][hor] == 3 | userFiledArr[ver - 2][hor] == 4)) {
+                userFiledArr[ver - 2][hor] = 0;
+                if (ver > 2 && userFiledArr[ver - 3][hor] == 4) {
+                    userFiledArr[ver - 3][hor] = 0;
+                }
+            }
         }
 
-        //если нажатие по двухпалубному кораблю
-        else if(userFiledArr[ver][hor] == 2) {
-            userFiledArr[ver][hor] = 5;
-            //меняем клетки вокруг корабля
-            if (ver > 0 && userFiledArr[(ver - 1)][hor] == 2) {
-                userFiledArr[(ver - 1)][hor] = 1; //клетка над кораблем
+        //удаляет нижнюю часть корабля
+        if (ver < GAME_FILED_LENGTH - 1 && (userFiledArr[ver + 1][hor] == 2 | userFiledArr[ver + 1][hor] == 3 | userFiledArr[ver + 1][hor] == 4)) {
+            userFiledArr[ver + 1][hor] = 0;
+            if (ver < GAME_FILED_LENGTH - 2 && (userFiledArr[ver + 2][hor] == 3 | userFiledArr[ver + 2][hor] == 4)) {
+                userFiledArr[ver + 2][hor] = 0;
+                if (ver < GAME_FILED_LENGTH - 3 && userFiledArr[ver + 3][hor] == 4) {
+                    userFiledArr[ver + 3][hor] = 0;
+                }
             }
-            else if (ver < GAME_FILED_LENGTH - 1 && userFiledArr[ver + 1][hor] == 2) {
-                userFiledArr[(ver + 1)][hor] = 1; //клетка под кораблем
+        }
+
+        //удаляет левую часть корабля
+        if (hor > 0 && (userFiledArr[ver][hor - 1] == 2 | userFiledArr[ver][hor - 1] == 3 | userFiledArr[ver][hor - 1] == 4)) {
+            userFiledArr[ver][hor - 1] = 0;
+            if (hor > 1 && (userFiledArr[ver][hor - 2] == 3 | userFiledArr[ver][hor - 2] == 4)) {
+                userFiledArr[ver][hor - 2] = 0;
+                if (hor > 2 && userFiledArr[ver][hor - 3] == 4) {
+                    userFiledArr[ver][hor - 3] = 0;
+                }
             }
-            else if (hor > 0 && userFiledArr[ver][hor - 1] == 2) {
-                userFiledArr[ver][hor - 1] = 1; //клетка под кораблем
-            }
-            else if (hor < GAME_FILED_LENGTH - 1 && userFiledArr[ver][hor + 1] == 2) {
-                userFiledArr[ver][hor + 1] = 1; //клетка под кораблем
+        }
+
+        //удаляет правую часть корабля
+        if (hor < GAME_FILED_LENGTH - 1 && (userFiledArr[ver][hor + 1] == 2 | userFiledArr[ver][hor + 1] == 3 | userFiledArr[ver][hor + 1] == 4)) {
+            userFiledArr[ver][hor + 1] = 0;
+            if (hor < GAME_FILED_LENGTH - 2 && (userFiledArr[ver][hor + 2] == 3 | userFiledArr[ver][hor + 2] == 4)) {
+                userFiledArr[ver][hor + 2] = 0;
+                if (hor < GAME_FILED_LENGTH - 3 && userFiledArr[ver][hor + 3] == 4) {
+                    userFiledArr[ver][hor + 3] = 0;
+                }
             }
         }
 
@@ -221,6 +243,26 @@ public class ManuallyPrepareService {
                             && (v < GAME_FILED_LENGTH - 1 && userFiledArr[v + 1][h] == 0 | userFiledArr[v + 1][h] == 5 | userFiledArr[v + 1][h] == 6)
                             && (userFiledArr[v - 1][h - 1] == 0 | userFiledArr[v - 1][h - 1] == 5 | userFiledArr[v - 1][h - 1] == 6)
                             && (userFiledArr[v + 1][h - 1] == 0 | userFiledArr[v + 1][h - 1] == 5 | userFiledArr[v + 1][h - 1] == 6)) {
+                        userFiledArr[v][h] = 0;
+                    }
+                    if(h == 0 && v == 0 && (userFiledArr[v + 1][h] == 0 | userFiledArr[v + 1][h] == 5 | userFiledArr[v + 1][h] == 6)
+                            && (userFiledArr[v + 1][h + 1] == 0 | userFiledArr[v + 1][h + 1] == 5 | userFiledArr[v + 1][h + 1] == 6)
+                            && (userFiledArr[v][h + 1] == 0 | userFiledArr[v][h + 1] == 5 | userFiledArr[v][h + 1] == 6)) {
+                        userFiledArr[v][h] = 0;
+                    }
+                    if(h == 0 && v == GAME_FILED_LENGTH - 1 && (userFiledArr[v - 1][h] == 0 | userFiledArr[v - 1][h] == 5 | userFiledArr[v - 1][h] == 6)
+                            && (userFiledArr[v - 1][h + 1] == 0 | userFiledArr[v - 1][h + 1] == 5 | userFiledArr[v - 1][h + 1] == 6)
+                            && (userFiledArr[v][h + 1] == 0 | userFiledArr[v][h + 1] == 5 | userFiledArr[v][h + 1] == 6)) {
+                        userFiledArr[v][h] = 0;
+                    }
+                    if(h == GAME_FILED_LENGTH - 1 && v == 0 && (userFiledArr[v + 1][h] == 0 | userFiledArr[v + 1][h] == 5 | userFiledArr[v + 1][h] == 6)
+                            && (userFiledArr[v + 1][h - 1] == 0 | userFiledArr[v + 1][h - 1] == 5 | userFiledArr[v + 1][h - 1] == 6)
+                            && (userFiledArr[v][h - 1] == 0 | userFiledArr[v][h - 1] == 5 | userFiledArr[v][h - 1] == 6)) {
+                        userFiledArr[v][h] = 0;
+                    }
+                    if(h == GAME_FILED_LENGTH - 1 && v == GAME_FILED_LENGTH - 1 && (userFiledArr[v - 1][h] == 0 | userFiledArr[v - 1][h] == 5 | userFiledArr[v - 1][h] == 6)
+                            && (userFiledArr[v - 1][h - 1] == 0 | userFiledArr[v - 1][h - 1] == 5 | userFiledArr[v - 1][h - 1] == 6)
+                            && (userFiledArr[v][h - 1] == 0 | userFiledArr[v][h - 1] == 5 | userFiledArr[v][h - 1] == 6)) {
                         userFiledArr[v][h] = 0;
                     }
                 }
