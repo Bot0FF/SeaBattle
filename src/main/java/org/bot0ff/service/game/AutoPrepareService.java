@@ -27,51 +27,58 @@ import static org.bot0ff.util.Constants.GAME_FILED_LENGTH;
 @Service
 @RequiredArgsConstructor
 public class AutoPrepareService {
-
+    private final ManuallyPrepareService manuallyPrepareService;
 
     //TODO оптимизация расстановки, если нет свободных мест для корабля, зависает в цикле
     public void setAutoUserGameFiled(User user) {
         int[][] userFiled = ManuallyPrepareService.prepareManuallyMap.get(user.getId());
 
         //очистка поля перед автоматической расстановкой
-        for(int ver = 0; ver < GAME_FILED_LENGTH; ver++) { //буквы по вертикали
-            for(int hor = 0; hor < GAME_FILED_LENGTH; hor++) { //цифры по горизонтали
+        for (int ver = 0; ver < GAME_FILED_LENGTH; ver++) { //буквы по вертикали
+            for (int hor = 0; hor < GAME_FILED_LENGTH; hor++) { //цифры по горизонтали
                 userFiled[ver][hor] = 0;
             }
         }
 
-        getShips(4, userFiled);
+        while (!manuallyPrepareService.checkPreparedShips(userFiled)) {
+            for (int ver = 0; ver < GAME_FILED_LENGTH; ver++) { //буквы по вертикали
+                for (int hor = 0; hor < GAME_FILED_LENGTH; hor++) { //цифры по горизонтали
+                    userFiled[ver][hor] = 0;
+                }
+            }
+            setShip(4, userFiled);
 
-        getShips(3, userFiled);
-        getShips(3, userFiled);
+            setShip(3, userFiled);
+            setShip(3, userFiled);
 
-        getShips(2, userFiled);
-        getShips(2, userFiled);
-        getShips(2, userFiled);
+            setShip(2, userFiled);
+            setShip(2, userFiled);
+            setShip(2, userFiled);
 
-        getShips(1, userFiled);
-        getShips(1, userFiled);
-//        getShips(1, userFiled);
-//        getShips(1, userFiled);
+            setShip(1, userFiled);
+            setShip(1, userFiled);
+            setShip(1, userFiled);
+            setShip(1, userFiled);
+        }
     }
 
     public List<String> setAutoAiGameFiled() {
         List<String> resultFiled = new ArrayList<>();
         int[][] aiFiled = new int[GAME_FILED_LENGTH][GAME_FILED_LENGTH];
 
-        getShips(4, aiFiled);
+        setShip(1, aiFiled);
+        setShip(1, aiFiled);
+        setShip(1, aiFiled);
+        setShip(1, aiFiled);
 
-        getShips(3, aiFiled);
-        getShips(3, aiFiled);
+        setShip(2, aiFiled);
+        setShip(2, aiFiled);
+        setShip(2, aiFiled);
 
-        getShips(2, aiFiled);
-        getShips(2, aiFiled);
-        getShips(2, aiFiled);
+        setShip(3, aiFiled);
+        setShip(3, aiFiled);
 
-        getShips(1, aiFiled);
-        getShips(1, aiFiled);
-//        getShips(1, aiFiled);
-//        getShips(1, aiFiled);
+        setShip(4, aiFiled);
 
         //заполняет оставшиеся координаты в поле
         for(int ver = 0; ver < GAME_FILED_LENGTH; ver++) { //буквы по вертикали
@@ -87,53 +94,56 @@ public class AutoPrepareService {
         return resultFiled;
     }
 
-    public void getShips(int shipType, int[][] gameFiled) {
+    public void setShip(int shipType, int[][] gameFiled) {
         int vertOrHor = getR0Or1();
         int pointHorizontal = 0;
         int pointVertical = 0;
-
-//        for(int ver = 0; ver < GAME_FILED_LENGTH; ver++) { //буквы по вертикали
-//            for(int hor = 0; hor < GAME_FILED_LENGTH; hor++) { //цифры по горизонтали
-//                gameFiled[ver][hor] = 0;
-//            }
-//        }
+        int countCycleValue = 0;
 
         if(vertOrHor == 0) {
             //вертикальное расположение
-            if(shipType == 4) {
+            if(shipType == 1) {
                 do {
                     pointHorizontal = getRNum(0);
                     pointVertical = getRNum(shipType);
+                    countCycleValue++;
+                    if(countCycleValue > 5) break;
+                }
+                while (!(gameFiled[pointVertical][pointHorizontal] == 0));
+            }
+            else if(shipType == 2) {
+                do {
+                    pointHorizontal = getRNum(0);
+                    pointVertical = getRNum(shipType);
+                    countCycleValue++;
+                    if(countCycleValue > 5) break;
+                }
+                while (!(gameFiled[pointVertical][pointHorizontal] == 0
+                        & gameFiled[pointVertical + 1][pointHorizontal] == 0));
+            }
+            else if(shipType == 3) {
+                do {
+                    pointHorizontal = getRNum(0);
+                    pointVertical = getRNum(shipType);
+                    countCycleValue++;
+                    if(countCycleValue > 5) break;
+                }
+                while (!(gameFiled[pointVertical][pointHorizontal] == 0
+                        & gameFiled[pointVertical + 1][pointHorizontal] == 0
+                        & gameFiled[pointVertical + 2][pointHorizontal] == 0));
+            }
+            else if(shipType == 4) {
+                do {
+                    pointHorizontal = getRNum(0);
+                    pointVertical = getRNum(shipType);
+                    countCycleValue++;
+                    if(countCycleValue > 5) break;
                 }
                 while (!(gameFiled[pointVertical][pointHorizontal] == 0
                         & gameFiled[pointVertical + 1][pointHorizontal] == 0
                         & gameFiled[pointVertical + 2][pointHorizontal] == 0
                         & gameFiled[pointVertical + 3][pointHorizontal] == 0));
 
-            }
-            else if(shipType == 3) {
-                do {
-                    pointHorizontal = getRNum(0);
-                    pointVertical = getRNum(shipType);
-                }
-                while (!(gameFiled[pointVertical][pointHorizontal] == 0
-                        & gameFiled[pointVertical + 1][pointHorizontal] == 0
-                        & gameFiled[pointVertical + 2][pointHorizontal] == 0));
-            }
-            else if(shipType == 2) {
-                do {
-                    pointHorizontal = getRNum(0);
-                    pointVertical = getRNum(shipType);
-                }
-                while (!(gameFiled[pointVertical][pointHorizontal] == 0
-                        & gameFiled[pointVertical + 1][pointHorizontal] == 0));
-            }
-            else if(shipType == 1) {
-                do {
-                    pointHorizontal = getRNum(0);
-                    pointVertical = getRNum(shipType);
-                }
-                while (!(gameFiled[pointVertical][pointHorizontal] == 0));
             }
 
             if(pointVertical > 0) {
@@ -162,44 +172,51 @@ public class AutoPrepareService {
                     gameFiled[ver][(pointHorizontal + 1)] = 6;
                 }
                 gameFiled[ver][pointHorizontal] = shipType;
-                //this.resultFiled.add(ver + ":" + pointHorizontal);
             }
         }
         else {
             //горизонтальное расположение
-            if(shipType == 4) {
+            if(shipType == 1) {
                 do {
                     pointHorizontal = getRNum(shipType);
                     pointVertical = getRNum(0);
+                    countCycleValue++;
+                    if(countCycleValue > 5) break;
                 }
-                while (!(gameFiled[pointVertical][pointHorizontal] == 0
-                        & gameFiled[pointVertical][pointHorizontal + 1] == 0
-                        & gameFiled[pointVertical][pointHorizontal + 2] == 0
-                        & gameFiled[pointVertical][pointHorizontal + 3] == 0));
-            }
-            else if(shipType == 3) {
-                do {
-                    pointHorizontal = getRNum(shipType);
-                    pointVertical = getRNum(0);
-                }
-                while (!(gameFiled[pointVertical][pointHorizontal] == 0
-                        & gameFiled[pointVertical][pointHorizontal + 1] == 0
-                        & gameFiled[pointVertical][pointHorizontal + 2] == 0));
+                while (!(gameFiled[pointVertical][pointHorizontal] == 0));
             }
             else if(shipType == 2) {
                 do {
                     pointHorizontal = getRNum(shipType);
                     pointVertical = getRNum(0);
+                    countCycleValue++;
+                    if(countCycleValue > 5) break;
                 }
                 while (!(gameFiled[pointVertical][pointHorizontal] == 0
                         & gameFiled[pointVertical][pointHorizontal + 1] == 0));
             }
-            else if(shipType == 1) {
+            else if(shipType == 3) {
                 do {
                     pointHorizontal = getRNum(shipType);
                     pointVertical = getRNum(0);
+                    countCycleValue++;
+                    if(countCycleValue > 5) break;
                 }
-                while (!(gameFiled[pointVertical][pointHorizontal] == 0));
+                while (!(gameFiled[pointVertical][pointHorizontal] == 0
+                        & gameFiled[pointVertical][pointHorizontal + 1] == 0
+                        & gameFiled[pointVertical][pointHorizontal + 2] == 0));
+            }
+            else if(shipType == 4) {
+                do {
+                    pointHorizontal = getRNum(shipType);
+                    pointVertical = getRNum(0);
+                    countCycleValue++;
+                    if(countCycleValue > 5) break;
+                }
+                while (!(gameFiled[pointVertical][pointHorizontal] == 0
+                        & gameFiled[pointVertical][pointHorizontal + 1] == 0
+                        & gameFiled[pointVertical][pointHorizontal + 2] == 0
+                        & gameFiled[pointVertical][pointHorizontal + 3] == 0));
             }
 
             if(pointHorizontal > 0) {
@@ -228,10 +245,11 @@ public class AutoPrepareService {
                     gameFiled[(pointVertical + 1)][hor] = 6;
                 }
                 gameFiled[pointVertical][hor] = shipType;
-                //this.resultFiled.add(pointVertical + ":" + hor);
             }
         }
     }
+
+
 
     //рандом 0-9
     private int getRNum(int shipLength) {

@@ -270,8 +270,7 @@ public class ManuallyPrepareService {
     }
 
     //проверка правильности подготовленного игрового поля
-    public boolean checkPreparedShips(User user) {
-        int[][] userFiledArr = ManuallyPrepareService.prepareManuallyMap.get(user.getId());
+    public boolean checkPreparedShips(int[][] gameFiled) {
         var oneDeckShip = 0;
         var twoDeckShip = 0;
         var threeDeckShip = 0;
@@ -279,16 +278,16 @@ public class ManuallyPrepareService {
 
         for(int ver = 0; ver < GAME_FILED_LENGTH; ver++) {
             for(int hor = 0; hor < GAME_FILED_LENGTH; hor++) {
-                if(userFiledArr[ver][hor] == 1) {
+                if(gameFiled[ver][hor] == 1) {
                     oneDeckShip++;
                 }
-                else if(userFiledArr[ver][hor] == 2) {
+                else if(gameFiled[ver][hor] == 2) {
                     twoDeckShip++;
                 }
-                else if(userFiledArr[ver][hor] == 3) {
+                else if(gameFiled[ver][hor] == 3) {
                     threeDeckShip++;
                 }
-                else if(userFiledArr[ver][hor] == 4) {
+                else if(gameFiled[ver][hor] == 4) {
                     fourDeckShip++;
                 }
             }

@@ -72,7 +72,7 @@ public class PrepareGameServiceImpl implements PrepareGameService {
             editMessageText.setReplyMarkup(InlineButton.setManuallyPrepareShip(user));
         }
         else if(cmd.equals("/searchGameVsUser")) {
-            if(manuallyPrepareService.checkPreparedShips(user)) {
+            if(manuallyPrepareService.checkPreparedShips(ManuallyPrepareService.prepareManuallyMap.get(user.getId()))) {
                 user.setState(SEARCH_GAME);
                 editMessageText.setText("Поиск противника...");
             }
@@ -82,7 +82,7 @@ public class PrepareGameServiceImpl implements PrepareGameService {
             }
         }
         else if(cmd.equals("/searchGameVsAi")) {
-            if(manuallyPrepareService.checkPreparedShips(user)) {
+            if(manuallyPrepareService.checkPreparedShips(ManuallyPrepareService.prepareManuallyMap.get(user.getId()))) {
                 //set userAi
                 var aiGameFiled = autoPrepareService.setAutoAiGameFiled();
                 user.setAiGameFiled(aiGameFiled);
