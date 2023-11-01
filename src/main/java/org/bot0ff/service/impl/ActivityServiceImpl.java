@@ -6,12 +6,14 @@ import org.bot0ff.component.button.InlineButton;
 import org.bot0ff.entity.User;
 import org.bot0ff.service.ActivityService;
 import org.bot0ff.service.UserService;
+import org.bot0ff.service.game.ManuallyPrepareService;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 
 import static org.bot0ff.entity.UserState.*;
 import static org.bot0ff.service.ServiceCommands.*;
+import static org.bot0ff.util.Constants.GAME_FILED_LENGTH;
 
 //обрабатывает запросы статуса ONLINE
 @Log4j
@@ -45,11 +47,11 @@ public class ActivityServiceImpl implements ActivityService {
     //ответы на inline запросы
     @Override
     public User changeOptions(User user, EditMessageText editMessageText, String cmd) {
-        if(cmd.equals("newGame")) {
-            user.setState(CHANGE_GAME_FILED);
-            userService.saveUser(user);
-            editMessageText.setText("Расстановка кораблей...");
-            editMessageText.setReplyMarkup(InlineButton.changePlacementOption());
+        if(cmd.equals("/newGame")) {
+            user.setState(PREPARE_GAME);
+            ManuallyPrepareService.prepareManuallyMap.put(user.getId(), new int[GAME_FILED_LENGTH][GAME_FILED_LENGTH]);
+            editMessageText.setText("Подготовка игрового поля...");
+            editMessageText.setReplyMarkup(InlineButton.setManuallyPrepareShip(user));
         }
         else {
             editMessageText.setText("Выберите действие, " + user.getName());

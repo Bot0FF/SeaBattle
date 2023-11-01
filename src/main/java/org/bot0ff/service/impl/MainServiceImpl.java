@@ -3,7 +3,6 @@ package org.bot0ff.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j;
 import org.bot0ff.component.TelegramBot;
-import org.bot0ff.component.button.InlineButton;
 import org.bot0ff.dto.ResponseDto;
 import org.bot0ff.service.*;
 import org.springframework.stereotype.Service;
@@ -22,9 +21,7 @@ public class MainServiceImpl implements MainService {
     private final UserService userService;
     private final RegistrationService registrationService;
     private final ActivityService activityService;
-    private final ChangeGameFiledService changeGameFiledService;
-    private final PrepareManuallyService prepareManuallyService;
-    private final PrepareAutoService prepareAutoService;
+    private final PrepareGameService prepareGameService;
     private final SearchGameService searchGameService;
     private final InGameService inGameService;
 
@@ -54,24 +51,8 @@ public class MainServiceImpl implements MainService {
                     .build();
             telegramBot.sendAnswer(response);
         }
-        else if(CHANGE_GAME_FILED.equals(userState)) {
-            var updateUser = changeGameFiledService.optionsPrepareGameText(user, sendMessage, inputMessage);
-            var response = ResponseDto.builder()
-                    .telegramBot(telegramBot)
-                    .sendMessage(updateUser.getSendMessage())
-                    .build();
-            telegramBot.sendAnswer(response);
-        }
-        else if(PREPARE_MANUALLY.equals(userState)) {
-            var answer = prepareManuallyService.optionsPrepareManuallyText(user, sendMessage, inputMessage);
-            var response = ResponseDto.builder()
-                    .telegramBot(telegramBot)
-                    .sendMessage(answer)
-                    .build();
-            telegramBot.sendAnswer(response);
-        }
-        else if(PREPARE_AUTOMATIC.equals(userState)) {
-            var updateUser = prepareAutoService.optionsPrepareAutomaticText(user, sendMessage, inputMessage);
+        else if(PREPARE_GAME.equals(userState)) {
+            var updateUser = prepareGameService.optionsPrepareGameText(user, sendMessage, inputMessage);
             var response = ResponseDto.builder()
                     .telegramBot(telegramBot)
                     .sendMessage(updateUser.getSendMessage())
@@ -137,27 +118,9 @@ public class MainServiceImpl implements MainService {
                     .build();
             telegramBot.sendAnswer(response);
         }
-        else if(CHANGE_GAME_FILED.equals(userState)) {
-            var updateUser = changeGameFiledService.optionsPrepareGameInline(user, editMessageText, inputMessage);
+        else if(PREPARE_GAME.equals(userState)) {
+            var updateUser = prepareGameService.optionsPrepareGameInline(user, editMessageText, inputMessage);
             var response = ResponseDto.builder()
-                    .telegramBot(telegramBot)
-                    .editMessageText(updateUser.getEditMessageText())
-                    .answerCallbackQuery(answerCallbackQuery)
-                    .build();
-            telegramBot.sendAnswer(response);
-        }
-        else if(PREPARE_MANUALLY.equals(userState)) {
-            var answer = prepareManuallyService.prepareGameManuallyInline(user, editMessageText, inputMessage);
-            var response = ResponseDto.builder()
-                    .telegramBot(telegramBot)
-                    .editMessageText(answer)
-                    .answerCallbackQuery(answerCallbackQuery)
-                    .build();
-            telegramBot.sendAnswer(response);
-        }
-        else if(PREPARE_AUTOMATIC.equals(userState)) {
-            var updateUser = prepareAutoService.prepareGameAutomaticInline(user, editMessageText, inputMessage);
-                    var response = ResponseDto.builder()
                     .telegramBot(telegramBot)
                     .editMessageText(updateUser.getEditMessageText())
                     .answerCallbackQuery(answerCallbackQuery)

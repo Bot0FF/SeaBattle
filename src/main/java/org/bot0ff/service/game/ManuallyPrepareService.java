@@ -3,7 +3,6 @@ package org.bot0ff.service.game;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j;
 import org.bot0ff.entity.User;
-import org.bot0ff.entity.UserFiled;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -16,11 +15,11 @@ import static org.bot0ff.util.Constants.GAME_FILED_LENGTH;
 @Service
 @RequiredArgsConstructor
 public class ManuallyPrepareService {
-    public static Map<Long, UserFiled> prepareManuallyMap = Collections.synchronizedMap(new HashMap<>());
+    public static Map<Long, int[][]> prepareManuallyMap = Collections.synchronizedMap(new HashMap<>());
 
     public int setUserFiled(User user, String cmd) {
         int result = 0;
-        int[][] userFiledArr = ManuallyPrepareService.prepareManuallyMap.get(user.getId()).getUserFiled();
+        int[][] userFiledArr = ManuallyPrepareService.prepareManuallyMap.get(user.getId());
         String[] split = cmd.split(":");
         int ver = Integer.parseInt(split[0]);
         int hor = Integer.parseInt(split[1]);
@@ -39,7 +38,7 @@ public class ManuallyPrepareService {
     }
 
     public int setShip(User user, int ver, int hor) {
-        int[][] userFiledArr = ManuallyPrepareService.prepareManuallyMap.get(user.getId()).getUserFiled();
+        int[][] userFiledArr = ManuallyPrepareService.prepareManuallyMap.get(user.getId());
 
         //проверка максимальной длины корабля
         int countMaxSquare = 0;
@@ -156,7 +155,7 @@ public class ManuallyPrepareService {
     }
 
     public void removeShip(User user, int ver, int hor) {
-        int[][] userFiledArr = ManuallyPrepareService.prepareManuallyMap.get(user.getId()).getUserFiled();
+        int[][] userFiledArr = ManuallyPrepareService.prepareManuallyMap.get(user.getId());
         userFiledArr[ver][hor] = 0;
 
         //удаляет верхнюю часть корабля
@@ -268,11 +267,11 @@ public class ManuallyPrepareService {
                 }
             }
         }
-
     }
 
-    public boolean countShips(User user) {
-        int[][] userFiledArr = ManuallyPrepareService.prepareManuallyMap.get(user.getId()).getUserFiled();
+    //проверка правильности подготовленного игрового поля
+    public boolean checkPreparedShips(User user) {
+        int[][] userFiledArr = ManuallyPrepareService.prepareManuallyMap.get(user.getId());
         var oneDeckShip = 0;
         var twoDeckShip = 0;
         var threeDeckShip = 0;

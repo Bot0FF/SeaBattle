@@ -38,7 +38,7 @@ public class InlineButton {
         List<InlineKeyboardButton> newGame = new ArrayList<>();
 
         newGame.add(new InlineKeyboardButton("Начать новую игру"));
-        newGame.get(0).setCallbackData("newGame");
+        newGame.get(0).setCallbackData("/newGame");
 
         List<List<InlineKeyboardButton>> rowsInLine = List.of(newGame);
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
@@ -47,72 +47,9 @@ public class InlineButton {
         return markupInline;
     }
 
-    //варианты расстановки кораблей
-    public static InlineKeyboardMarkup changePlacementOption() {
-        List<InlineKeyboardButton> newGameVsAI = new ArrayList<>();
-        List<InlineKeyboardButton> newGameVsUser = new ArrayList<>();
-
-        newGameVsAI.add(new InlineKeyboardButton("Расставить вручную"));
-        newGameVsAI.get(0).setCallbackData("prepareManually");
-        newGameVsUser.add(new InlineKeyboardButton("Расставить автоматически"));
-        newGameVsUser.get(0).setCallbackData("prepareAutomatic");
-
-        List<List<InlineKeyboardButton>> rowsInLine = List.of(newGameVsAI, newGameVsUser);
-        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
-        markupInline.setKeyboard(rowsInLine);
-
-        return markupInline;
-    }
-
-    public static InlineKeyboardMarkup startManuallyPrepare() {
-        List<InlineKeyboardButton> manuallyPrepare = new ArrayList<>();
-
-        manuallyPrepare.add(new InlineKeyboardButton("Начать расстановку"));
-        manuallyPrepare.get(0).setCallbackData("startManuallyPrepare");
-
-        List<List<InlineKeyboardButton>> rowsInLine = List.of(manuallyPrepare);
-        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
-        markupInline.setKeyboard(rowsInLine);
-
-        return markupInline;
-    }
-
-    public static InlineKeyboardMarkup startAutomaticPrepare() {
-        List<InlineKeyboardButton> manuallyPrepare = new ArrayList<>();
-
-        manuallyPrepare.add(new InlineKeyboardButton("Начать расстановку"));
-        manuallyPrepare.get(0).setCallbackData("startAutomaticPrepare");
-
-        List<List<InlineKeyboardButton>> rowsInLine = List.of(manuallyPrepare);
-        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
-        markupInline.setKeyboard(rowsInLine);
-
-        return markupInline;
-    }
-
-    public static InlineKeyboardMarkup confirmAutomaticPrepare() {
-        List<InlineKeyboardButton> updateGameFiled = new ArrayList<>();
-        List<InlineKeyboardButton> findOpponent = new ArrayList<>();
-        List<InlineKeyboardButton> gameVsAi = new ArrayList<>();
-
-        updateGameFiled.add(new InlineKeyboardButton("Расставить еще раз"));
-        updateGameFiled.get(0).setCallbackData("updateAutomaticPrepare");
-        findOpponent.add(new InlineKeyboardButton("Начать поиск противника"));
-        findOpponent.get(0).setCallbackData("confirmFindOpponent");
-        gameVsAi.add(new InlineKeyboardButton("Начать игру против ИИ"));
-        gameVsAi.get(0).setCallbackData("confirmGameVsAi");
-
-
-        List<List<InlineKeyboardButton>> rowsInLine = List.of(updateGameFiled, findOpponent, gameVsAi);
-        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
-        markupInline.setKeyboard(rowsInLine);
-
-        return markupInline;
-    }
-
     //управление расстановкой кораблей
     public static InlineKeyboardMarkup setManuallyPrepareShip(User user) {
-        int[][] tempUserFiled = ManuallyPrepareService.prepareManuallyMap.get(user.getId()).getUserFiled();
+        int[][] tempUserFiled = ManuallyPrepareService.prepareManuallyMap.get(user.getId());
         List<List<InlineKeyboardButton>> listButton = new ArrayList<>();
 
 
@@ -148,12 +85,18 @@ public class InlineButton {
             }
         }
 
-        List<InlineKeyboardButton> autoButton = new ArrayList<>();
-        autoButton.add(new InlineKeyboardButton("Автоматически"));
-        autoButton.add(new InlineKeyboardButton("Подтвердить"));
-        autoButton.get(0).setCallbackData("autoPrepare");
-        autoButton.get(1).setCallbackData("confirmPrepare");
-        listButton.add(listButton.size(), autoButton);
+        List<InlineKeyboardButton> autoPrepareButton = new ArrayList<>();
+        autoPrepareButton.add(new InlineKeyboardButton("Расставить автоматически"));
+        autoPrepareButton.get(0).setCallbackData("/autoPrepareGameFiled");
+
+        List<InlineKeyboardButton> startGameButton = new ArrayList<>();
+        startGameButton.add(new InlineKeyboardButton("Игрок VS Игрок"));
+        startGameButton.add(new InlineKeyboardButton("Игрок VS ИИ"));
+        startGameButton.get(0).setCallbackData("/searchGameVsUser");
+        startGameButton.get(1).setCallbackData("/searchGameVsAi");
+
+        listButton.add(listButton.size(), autoPrepareButton);
+        listButton.add(listButton.size(), startGameButton);
 
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
         markupInline.setKeyboard(listButton);
@@ -166,7 +109,7 @@ public class InlineButton {
         List<InlineKeyboardButton> stopSearchGame = new ArrayList<>();
 
         stopSearchGame.add(new InlineKeyboardButton("Отменить поиск сражения"));
-        stopSearchGame.get(0).setCallbackData("stopSearchGame");
+        stopSearchGame.get(0).setCallbackData("/stopSearchGame");
 
         List<List<InlineKeyboardButton>> rowsInLine = List.of(stopSearchGame);
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
