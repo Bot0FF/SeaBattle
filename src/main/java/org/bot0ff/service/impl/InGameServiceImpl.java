@@ -67,11 +67,11 @@ public class InGameServiceImpl implements InGameService {
                 User usr = userService.findOrSaveUser(update);
                 user.setOpponentGameFiled(usr.getOpponentGameFiled());
                 editMessageText.setText(gameMessageService
-                        .getCurrentGameFiled("Попадание. Ваш ход...", gameFiledService.convertListFiledToArr(user.getUserGameFiled())));
+                        .getCurrentGameFiled("Попадание. Вы продолжаете...", gameFiledService.convertListFiledToArr(user.getUserGameFiled())));
                 editMessageText.setReplyMarkup(InlineButton.gameBoard(user.getOpponentGameFiled()));
                 user.setEditMessageText(editMessageText);
             }
-            else if(checkUserStep == 2) {
+            else if(checkUserStep == 0) {
                 User usr = userService.findOrSaveUser(update);
                 user.setActive(false);
                 user.setOpponentGameFiled(usr.getOpponentGameFiled());

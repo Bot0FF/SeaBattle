@@ -60,7 +60,7 @@ public class UserAiController {
                     checkAiStep = checkAiStep(usr);
                     if(checkAiStep == 1) {
                         editMessageText.setText(gameMessageService
-                                .getCurrentGameFiled("Противник попал...", gameFiledService.convertListFiledToArr(usr.getUserGameFiled())));
+                                .getCurrentGameFiled("Противник попал и продолжает...", gameFiledService.convertListFiledToArr(usr.getUserGameFiled())));
                         editMessageText.setReplyMarkup(InlineButton.gameBoard(usr.getOpponentGameFiled()));
                     }
                     else if(checkAiStep == 0){

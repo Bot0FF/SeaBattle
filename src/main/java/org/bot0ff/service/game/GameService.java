@@ -39,14 +39,14 @@ public class GameService {
         }
 
         if(countShips < 1) {
-            result = -1;
+            return -1;
         }
-        else if(opponentGameFiled[targetVer][targetHor] == 1
+        if(opponentGameFiled[targetVer][targetHor] == 1
                 | opponentGameFiled[targetVer][targetHor] == 2
                 | opponentGameFiled[targetVer][targetHor] == 3
                 | opponentGameFiled[targetVer][targetHor] == 4) {
-            user.setOpponentGameFiled(gameFiledService.convertArrFiledToList(opponentGameFiled));
             opponentGameFiled[targetVer][targetHor] = -1;
+            user.setOpponentGameFiled(gameFiledService.convertArrFiledToList(opponentGameFiled));
             result = 1;
         }
         else {

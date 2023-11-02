@@ -15,8 +15,8 @@ public class GameMessageService {
     private final String twoDeckShip = EmojiParser.parseToUnicode(":speedboat:");
     private final String threeDeckShip = EmojiParser.parseToUnicode(":ferry:");
     private final String fourDeckShip = EmojiParser.parseToUnicode(":ship:");
-    private final String hit = EmojiParser.parseToUnicode(":red_circle:");
-    private final String miss = EmojiParser.parseToUnicode(":white_circle:");
+    private final String hit = EmojiParser.parseToUnicode(":x:");
+    private final String miss = EmojiParser.parseToUnicode(":o:");
     private final String water = EmojiParser.parseToUnicode(":droplet:");
 
     public static String emojiPars(String emojiName) {
