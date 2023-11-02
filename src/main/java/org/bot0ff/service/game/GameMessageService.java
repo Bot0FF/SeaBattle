@@ -1,21 +1,23 @@
 package org.bot0ff.service.game;
 
 import com.vdurmont.emoji.EmojiParser;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j;
-import org.bot0ff.entity.User;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 import static org.bot0ff.util.Constants.GAME_FILED_LENGTH;
 
 @Log4j
 @Service
+@RequiredArgsConstructor
 public class GameMessageService {
+    private final String oneDeckShip = EmojiParser.parseToUnicode(":sailboat:");
+    private final String twoDeckShip = EmojiParser.parseToUnicode(":speedboat:");
+    private final String threeDeckShip = EmojiParser.parseToUnicode(":ferry:");
+    private final String fourDeckShip = EmojiParser.parseToUnicode(":ship:");
+    private final String hit = EmojiParser.parseToUnicode(":red_circle:");
+    private final String miss = EmojiParser.parseToUnicode(":white_circle:");
     private final String water = EmojiParser.parseToUnicode(":droplet:");
-    private final String ship = EmojiParser.parseToUnicode(":sailboat:");
-    private final String success = EmojiParser.parseToUnicode(":anchor:");
-    private final String miss = EmojiParser.parseToUnicode(":mag:");
 
     public static String emojiPars(String emojiName) {
         return EmojiParser.parseToUnicode(emojiName);
@@ -26,41 +28,30 @@ public class GameMessageService {
     }
 
     //возвращает поле в виде смайлового представления
-    public StringBuilder getEmojiGameFiled(List<String> gameFiled) {
-        int [][] tempArr = new int[GAME_FILED_LENGTH][GAME_FILED_LENGTH];
-        for(String coordinate : gameFiled) {
-            if(coordinate.contains(":")) {
-                String[] split = coordinate.split(":");
-                tempArr[Integer.parseInt(split[0])][Integer.parseInt(split[1])] = 1; //корабль есть
-            }
-            if(coordinate.contains("_")) {
-                String[] split = coordinate.split("_");
-                tempArr[Integer.parseInt(split[0])][Integer.parseInt(split[1])] = 2; //вода
-            }
-            else if(coordinate.contains("-")) {
-                String[] split = coordinate.split("-");
-                tempArr[Integer.parseInt(split[0])][Integer.parseInt(split[1])] = -1; //корабль подбит
-            }
-            else if(coordinate.contains("/")) {
-                String[] split = coordinate.split("/");
-                tempArr[Integer.parseInt(split[0])][Integer.parseInt(split[1])] = 0; //мимо
-            }
-
-        }
+    public StringBuilder getEmojiGameFiled(int[][] userGameFiled) {
         StringBuilder sb = new StringBuilder();
         for(int ver = 0; ver < GAME_FILED_LENGTH; ver++) {
             for(int hor = 0; hor < GAME_FILED_LENGTH; hor++) {
-                if(tempArr[ver][hor] == 1) {
-                    sb.append(emojiParser(ship));
+                if(userGameFiled[ver][hor] == 1) {
+                    sb.append(emojiParser(oneDeckShip)).append(" ");
                 }
-                else if(tempArr[ver][hor] == -1) {
-                    sb.append(emojiParser(success));
+                else if(userGameFiled[ver][hor] == 2) {
+                    sb.append(emojiParser(twoDeckShip)).append(" ");
                 }
-                else if(tempArr[ver][hor] == 0) {
-                    sb.append(emojiParser(miss));
+                else if(userGameFiled[ver][hor] == 3) {
+                    sb.append(emojiParser(threeDeckShip)).append(" ");
+                }
+                else if(userGameFiled[ver][hor] == 4) {
+                    sb.append(emojiParser(fourDeckShip)).append(" ");
+                }
+                else if(userGameFiled[ver][hor] == -1) {
+                    sb.append(emojiParser(hit)).append(" ");
+                }
+                else if(userGameFiled[ver][hor] == -2) {
+                    sb.append(emojiParser(miss)).append(" ");
                 }
                 else {
-                    sb.append(emojiParser(water));
+                    sb.append(emojiParser(water)).append(" ");
                 }
             }
             sb.append("\n");
@@ -69,10 +60,9 @@ public class GameMessageService {
     }
 
     //возвращает текстовое представление результата хода
-    public String getCurrentGameFiled(String notification, User user) {
+    public String getCurrentGameFiled(String notification, int[][] userGameFiled) {
         return  notification +
-                "\nПоле противника\n" + getEmojiGameFiled(user.getAiGameFiled()) +
-                "-----------------------\n" +
-                "Ваше поле\n" + getEmojiGameFiled(user.getGameFiled());
+                "\nВаше поле\n" + getEmojiGameFiled(userGameFiled) +
+                "\nПоле противника";
     }
 }

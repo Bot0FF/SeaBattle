@@ -8,13 +8,13 @@ import org.bot0ff.component.button.InlineButton;
 import org.bot0ff.dto.ResponseDto;
 import org.bot0ff.entity.User;
 import org.bot0ff.service.UserService;
+import org.bot0ff.service.game.GameFiledService;
 import org.bot0ff.service.game.GameMessageService;
 import org.springframework.stereotype.Service;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -37,19 +37,17 @@ public class UserAiController {
     private static final ExecutorService EXECUTOR_SERVICE = Executors.newCachedThreadPool();
     private TelegramBot telegramBot;
     private final UserService userService;
+    private final GameFiledService gameFiledService;
     private final GameMessageService gameMessageService;
 
     public void registerBot(TelegramBot telegramBot) {
         this.telegramBot = telegramBot;
     }
 
-    public void userAiAction(Update update, User user) {
-        var sendMessage = new SendMessage();
-        if(update.hasMessage()) {
-            sendMessage.setChatId(update.getMessage().getChatId());
-        }
-        else if(update.hasCallbackQuery()) {
-            sendMessage.setChatId(update.getCallbackQuery().getMessage().getChatId());
+    public void userAiAction(Update update, EditMessageText editMessageText, User user) {
+        if(update.hasCallbackQuery()) {
+            editMessageText.setChatId(update.getCallbackQuery().getMessage().getChatId());
+            editMessageText.setMessageId(user.getMessageId());
         }
         else return;
 
@@ -57,29 +55,30 @@ public class UserAiController {
             try {
                 var checkAiStep = 0;
                 do {
+                    User usr = userService.findOrSaveUser(update);
                     TimeUnit.SECONDS.sleep(2);
-                    checkAiStep = checkAiStep(user);
+                    checkAiStep = checkAiStep(usr);
                     if(checkAiStep == 1) {
-                        sendMessage.setText(gameMessageService.getCurrentGameFiled("Противник попал и продолжает ход...", user));
+                        editMessageText.setText(gameMessageService
+                                .getCurrentGameFiled("Противник попал...", gameFiledService.convertListFiledToArr(usr.getUserGameFiled())));
+                        editMessageText.setReplyMarkup(InlineButton.gameBoard(usr.getOpponentGameFiled()));
                     }
-                    else if(checkAiStep == -1) {
-                        sendMessage.setText(gameMessageService.getCurrentGameFiled("Противник не попал. Ваш ход...", user));
-                        sendMessage.setReplyMarkup(InlineButton.charGameBoard());
-                    }
-                    else if(checkAiStep == 0) {
-                        sendMessage.setText("Ожидание хода противника...");
+                    else if(checkAiStep == 0){
+                        editMessageText.setText(gameMessageService
+                                .getCurrentGameFiled("Противник не попал. Ваш ход...", gameFiledService.convertListFiledToArr(usr.getUserGameFiled())));
+                        editMessageText.setReplyMarkup(InlineButton.gameBoard(usr.getOpponentGameFiled()));
                     }
                     else {
-                        sendMessage.setText("Поражение...\nВыберите действие, " + user.getName());
-                        sendMessage.setReplyMarkup(InlineButton.changeOptions());
+                        editMessageText.setText("Поражение...\nВыберите действие, " + usr.getName());
+                        editMessageText.setReplyMarkup(InlineButton.changeOptions());
                     }
                     var response = ResponseDto.builder()
                             .telegramBot(telegramBot)
-                            .sendMessage(sendMessage)
+                            .editMessageText(editMessageText)
                             .build();
                     telegramBot.sendAnswer(response);
                 }
-                while (checkAiStep == 1 | checkAiStep == 0);
+                while (checkAiStep == 1);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -88,37 +87,48 @@ public class UserAiController {
 
     //проверяет попадание ИИ
     private int checkAiStep(User user) {
-        List<String> userFiled = user.getGameFiled();
-        int ver = getRNum();
-        int hor = getRNum();
-        String existShip  = ver + ":" + hor;
-        String notExistShip = ver + "_" + hor;
-        int result = 0;
+        int result;
+        int targetVer = getRNum();
+        int targetHor = getRNum();
 
-        for (String coordinate : userFiled) {
-            if(coordinate.equals(existShip)) {
-                userFiled = userFiled.stream().map(target -> target.equals(existShip) ? (ver + "-" + hor) : target).toList();
-                user.setGameFiled(userFiled);
-                userService.saveUser(user);
-                result = 1;
-            }
-            else if(coordinate.equals(notExistShip)) {
-                userFiled = userFiled.stream().map(target -> target.equals(notExistShip) ? (ver + "/" + hor) : target).toList();
-                user.setActive(true);
-                user.setGameFiled(userFiled);
-                userService.saveUser(user);
-                result = -1;
+        int[][] userGameFiled = gameFiledService.convertListFiledToArr(user.getUserGameFiled());
+
+        //проверка наличия оставшихся кораблей user
+        int countShips = 0;
+        for(int ver = 0; ver < GAME_FILED_LENGTH; ver++) {
+            for(int hor = 0; hor < GAME_FILED_LENGTH; hor++) {
+                if(userGameFiled[ver][hor] == 1
+                        | userGameFiled[ver][hor] == 2
+                        | userGameFiled[ver][hor] == 3
+                        | userGameFiled[ver][hor] == 4) {
+                    countShips++;
+                }
             }
         }
-        //проверка на оставшиеся корабли
-        if(userFiled.stream().noneMatch(aliveShip -> aliveShip.contains(":"))) {
+
+        if(countShips < 1) {
             user.setState(ONLINE);
             user.setActive(false);
-            user.setGameFiled(new ArrayList<>());
-            user.setAiGameFiled(new ArrayList<>());
-            userService.saveUser(user);
-            result = -2;
+            user.setOpponentId(0L);
+            user.setUserGameFiled(new ArrayList<>());
+            user.setOpponentGameFiled(new ArrayList<>());
+            result = -1;
         }
+        else if(userGameFiled[targetVer][targetHor] == 1
+                | userGameFiled[targetVer][targetHor] == 2
+                | userGameFiled[targetVer][targetHor] == 3
+                | userGameFiled[targetVer][targetHor] == 4) {
+            userGameFiled[targetVer][targetHor] = -1;
+            user.setUserGameFiled(gameFiledService.convertArrFiledToList(userGameFiled));
+            result = 1;
+        }
+        else {
+            userGameFiled[targetVer][targetHor] = -2;
+            user.setActive(true);
+            user.setUserGameFiled(gameFiledService.convertArrFiledToList(userGameFiled));
+            result = 0;
+        }
+        userService.saveUser(user);
         return result;
     }
 

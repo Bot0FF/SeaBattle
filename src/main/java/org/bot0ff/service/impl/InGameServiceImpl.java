@@ -8,12 +8,16 @@ import org.bot0ff.entity.User;
 import org.bot0ff.service.InGameService;
 import org.bot0ff.service.UserService;
 import org.bot0ff.controller.UserAiController;
+import org.bot0ff.service.game.GameFiledService;
 import org.bot0ff.service.game.GameService;
 import org.bot0ff.service.game.GameMessageService;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Update;
+
+import java.util.ArrayList;
 
 import static org.bot0ff.entity.UserState.ONLINE;
 import static org.bot0ff.service.ServiceCommands.*;
@@ -26,80 +30,72 @@ public class InGameServiceImpl implements InGameService {
     private final UserService userService;
     private final GameService gameService;
     private final GameMessageService gameMessageService;
+    private final GameFiledService gameFiledService;
     private final UserAiController userAiController;
     private final EndGameController endGameController;
 
     //ответы на текстовые запросы
     @Override
     public User processTextMessage(Update update, User user, SendMessage sendMessage, String cmd) {
-        if(CANCEL.equals(cmd)) {
-            user.setState(ONLINE);
-            userService.saveUser(user);
-            sendMessage.setText("Сброс настроек игры...\nВыберите действие, " + user.getName());
-            sendMessage.setReplyMarkup(InlineButton.changeOptions());
-        }
-        else if(HELP.equals(cmd)) {
-            sendMessage.setText("Помощь");
-        }
-        else {
-            if(user.isActive() & user.getChangeTarget().isEmpty()) {
-                sendMessage.setText(gameMessageService.getCurrentGameFiled("Ваш ход...", user));
-                sendMessage.setReplyMarkup(InlineButton.charGameBoard());
-            }
-            else if(user.isActive() & !user.getChangeTarget().isEmpty()) {
-                sendMessage.setText(gameMessageService.getCurrentGameFiled("Ваш ход...", user));
-                sendMessage.setReplyMarkup(InlineButton.numGameBoard());
+        if(START.equals(cmd)) {
+            if(user.isActive()) {
+                sendMessage.setText(gameMessageService
+                        .getCurrentGameFiled("Ваш ход...", gameFiledService.convertListFiledToArr(user.getUserGameFiled())));
             }
             else {
-                sendMessage.setText("Идет сражение...");
-                userAiController.userAiAction(update, user);
+                sendMessage.setText(gameMessageService
+                        .getCurrentGameFiled("Ход противника...", gameFiledService.convertListFiledToArr(user.getUserGameFiled())));
             }
+            sendMessage.setReplyMarkup(InlineButton.gameBoard(user.getOpponentGameFiled()));
+            user.setSendMessage(sendMessage);
         }
-        user.setSendMessage(sendMessage);
+        else if(CANCEL.equals(cmd)) {
+            user.setState(ONLINE);
+            sendMessage.setText("Сброс настроек игры...\nВыберите действие, " + user.getName());
+            sendMessage.setReplyMarkup(InlineButton.changeOptions());
+            user.setSendMessage(sendMessage);
+        }
         return user;
     }
 
     //ответы на inline запросы
     @Override
-    public User processCallbackQuery(Update update, User user, EditMessageText editMessageText, String cmd) {
-        if(user.isActive() & cmd.matches("[А-К]") & user.getChangeTarget().isEmpty()) {
-            user.setChangeTarget(cmd);
-            editMessageText.setText(gameMessageService.getCurrentGameFiled("Ваш ход...", user));
-            editMessageText.setReplyMarkup(InlineButton.numGameBoard());
-        }
-        else if(user.isActive() & cmd.matches("[1-9]|10") & !user.getChangeTarget().isEmpty()) {
-            var userChangeTarget = user.getChangeTarget() + ":" + cmd;
-            var checkStepUser = gameService.checkUserStep(userChangeTarget, user);
-            if(checkStepUser == 1) {
-                editMessageText.setText(gameMessageService.getCurrentGameFiled("Вы попали! Ваш ход...", user));
-                editMessageText.setReplyMarkup(InlineButton.charGameBoard());
+    public User processCallbackQuery(Update update, User user, EditMessageText editMessageText, AnswerCallbackQuery answerCallbackQuery, String cmd) {
+        if(user.isActive() && cmd.matches("[0-9]:[0-9]")) {
+            int checkUserStep = gameService.checkUserStep(cmd, user);
+            if(checkUserStep == 1) {
+                User usr = userService.findOrSaveUser(update);
+                user.setOpponentGameFiled(usr.getOpponentGameFiled());
+                editMessageText.setText(gameMessageService
+                        .getCurrentGameFiled("Попадание. Ваш ход...", gameFiledService.convertListFiledToArr(user.getUserGameFiled())));
+                editMessageText.setReplyMarkup(InlineButton.gameBoard(user.getOpponentGameFiled()));
+                user.setEditMessageText(editMessageText);
             }
-            else if(checkStepUser == 0) {
-                editMessageText.setText(gameMessageService.getCurrentGameFiled("Вы не попали! Ход противника...", user));
-                userAiController.userAiAction(update, user);
-            }
-            else {
-                editMessageText.setText("Победа!");
-                endGameController.endGame(update);
-            }
-        }
-        else {
-            if(user.isActive()) {
-                if(user.getChangeTarget().isEmpty()) {
-                    editMessageText.setText(gameMessageService.getCurrentGameFiled("Ваш ход", user));
-                    editMessageText.setReplyMarkup(InlineButton.charGameBoard());
-                }
-                else {
-                    editMessageText.setText(gameMessageService.getCurrentGameFiled("Ваш ход", user));
-                    editMessageText.setReplyMarkup(InlineButton.numGameBoard());
-                }
+            else if(checkUserStep == 2) {
+                User usr = userService.findOrSaveUser(update);
+                user.setActive(false);
+                user.setOpponentGameFiled(usr.getOpponentGameFiled());
+                editMessageText.setText(gameMessageService
+                        .getCurrentGameFiled("Промах. Ход противника...", gameFiledService.convertListFiledToArr(user.getUserGameFiled())));
+                editMessageText.setReplyMarkup(InlineButton.gameBoard(user.getOpponentGameFiled()));
+                user.setEditMessageText(editMessageText);
+                userAiController.userAiAction(update, editMessageText, user);
             }
             else {
-                editMessageText.setText("Идет сражение...");
-                userAiController.userAiAction(update, user);
+                user.setState(ONLINE);
+                user.setActive(false);
+                user.setOpponentId(0L);
+                user.setUserGameFiled(new ArrayList<>());
+                user.setOpponentGameFiled(new ArrayList<>());
+                editMessageText.setText("Победа!\nВыберите действие, " + user.getName());
+                editMessageText.setReplyMarkup(InlineButton.changeOptions());
+                endGameController.endGameOpponent(user.getOpponentId());
             }
         }
-        user.setEditMessageText(editMessageText);
+        else if(!user.isActive()) {
+            answerCallbackQuery.setText("Ход противника...");
+        }
+        user.setAnswerCallbackQuery(answerCallbackQuery);
         return user;
     }
 }

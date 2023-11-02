@@ -23,7 +23,6 @@ public class TextButton {
         List<BotCommand> listOfCommands = new ArrayList<>();
         listOfCommands.add(new BotCommand("/start", "Start"));
         listOfCommands.add(new BotCommand("/cancel", "Завершить игру"));
-        listOfCommands.add(new BotCommand("/help", "Помощь"));
 
         return listOfCommands;
     }

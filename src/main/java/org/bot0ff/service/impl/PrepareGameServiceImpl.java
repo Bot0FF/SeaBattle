@@ -5,11 +5,12 @@ import lombok.extern.log4j.Log4j;
 import org.bot0ff.component.button.InlineButton;
 import org.bot0ff.entity.User;
 import org.bot0ff.service.PrepareGameService;
-import org.bot0ff.service.UserService;
 import org.bot0ff.service.game.AutoPrepareService;
+import org.bot0ff.service.game.GameFiledService;
 import org.bot0ff.service.game.GameMessageService;
 import org.bot0ff.service.game.ManuallyPrepareService;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 
@@ -21,89 +22,79 @@ import static org.bot0ff.service.ServiceCommands.*;
 @Service
 @RequiredArgsConstructor
 public class PrepareGameServiceImpl implements PrepareGameService {
-    private final UserService userService;
     private final ManuallyPrepareService manuallyPrepareService;
     private final AutoPrepareService autoPrepareService;
+    private final GameFiledService gameFiledService;
     private final GameMessageService gameMessageService;
 
     //ответы на текстовые запросы
     @Override
     public User optionsPrepareGameText(User user, SendMessage sendMessage, String cmd) {
         if(START.equals(cmd)) {
-            sendMessage.setText("Идет расстановка кораблей...");
+            sendMessage.setText("Подготовка игрового поля...");
             sendMessage.setReplyMarkup(InlineButton.setManuallyPrepareShip(user));
+            user.setSendMessage(sendMessage);
         }
         else if(CANCEL.equals(cmd)) {
             user.setState(ONLINE);
-            userService.saveUser(user);
             sendMessage.setText("Сброс настроек игры...\nВыберите действие, " + user.getName());
             sendMessage.setReplyMarkup(InlineButton.changeOptions());
+            user.setSendMessage(sendMessage);
         }
-        else if(HELP.equals(cmd)) {
-            sendMessage.setText("Помощь");
-        }
-        else {
-            sendMessage.setText("Идет расстановка кораблей...");
-            sendMessage.setReplyMarkup(InlineButton.setManuallyPrepareShip(user));
-        }
-        user.setSendMessage(sendMessage);
         return user;
     }
 
     //ответы на inline запросы
     @Override
-    public User optionsPrepareGameInline(User user, EditMessageText editMessageText, String cmd) {
+    public User optionsPrepareGameInline(User user, EditMessageText editMessageText, AnswerCallbackQuery answerCallbackQuery, String cmd) {
         if(cmd.matches("[0-9]:[0-9]")) {
             int result;
             String[] split = cmd.split(":");
-            result = manuallyPrepareService.setUserFiled(user, cmd);
-            int currentCoordinate = ManuallyPrepareService.prepareManuallyMap.get(user.getId())[Integer.parseInt(split[0])][Integer.parseInt(split[1])];
-            if(result == 6 | currentCoordinate == 6) {
-                return null;
-            }
-            else  {
-                editMessageText.setText("Идет расстановка кораблей...");
+            result = manuallyPrepareService.setUserGameFiled(user, cmd);
+            int currentCoordinate = GameFiledService.prepareUserFiledMap.get(user.getId())[Integer.parseInt(split[0])][Integer.parseInt(split[1])];
+            if(result != 6 | currentCoordinate != 6) {
+                editMessageText.setText("Ручная расстановка...");
                 editMessageText.setReplyMarkup(InlineButton.setManuallyPrepareShip(user));
+                user.setEditMessageText(editMessageText);
             }
         }
         else if(cmd.equals("/autoPrepareGameFiled")) {
             autoPrepareService.setAutoUserGameFiled(user);
             editMessageText.setText("Автоматическая расстановка...");
             editMessageText.setReplyMarkup(InlineButton.setManuallyPrepareShip(user));
+            user.setEditMessageText(editMessageText);
         }
         else if(cmd.equals("/searchGameVsUser")) {
-            if(manuallyPrepareService.checkPreparedShips(ManuallyPrepareService.prepareManuallyMap.get(user.getId()))) {
+            if(gameFiledService.checkPreparedShips(GameFiledService.prepareUserFiledMap.get(user.getId()))) {
                 user.setState(SEARCH_GAME);
                 editMessageText.setText("Поиск противника...");
+                user.setEditMessageText(editMessageText);
             }
             else {
-                editMessageText.setText("Неверно расставлены корабли...");
-                editMessageText.setReplyMarkup(InlineButton.setManuallyPrepareShip(user));
+                answerCallbackQuery.setText("Неверно расставлены корабли...");
             }
         }
         else if(cmd.equals("/searchGameVsAi")) {
-            if(manuallyPrepareService.checkPreparedShips(ManuallyPrepareService.prepareManuallyMap.get(user.getId()))) {
+            if(gameFiledService.checkPreparedShips(GameFiledService.prepareUserFiledMap.get(user.getId()))) {
                 //set userAi
                 var aiGameFiled = autoPrepareService.setAutoAiGameFiled();
-                user.setAiGameFiled(aiGameFiled);
+                user.setOpponentGameFiled(gameFiledService.convertArrFiledToList(aiGameFiled));
                 //set User
+                var userGameFiled = GameFiledService.prepareUserFiledMap.get(user.getId());
+                user.setUserGameFiled(gameFiledService.convertArrFiledToList(userGameFiled));
+                GameFiledService.prepareUserFiledMap.remove(user.getId());
                 user.setState(IN_GAME);
                 user.setActive(true);
-                editMessageText.setText(gameMessageService.getCurrentGameFiled("Началась игра против ИИ\n Первый ход ваш...", user));
-                editMessageText.setReplyMarkup(InlineButton.charGameBoard());
+                editMessageText.setText(gameMessageService
+                        .getCurrentGameFiled("Ваш ход...", gameFiledService.convertListFiledToArr(user.getUserGameFiled())));
+                editMessageText.setReplyMarkup(InlineButton.gameBoard(user.getOpponentGameFiled()));
+                user.setEditMessageText(editMessageText);
             }
             else {
-                editMessageText.setText("Неверно расставлены корабли...");
-                editMessageText.setReplyMarkup(InlineButton.setManuallyPrepareShip(user));
+                answerCallbackQuery.setText("Неверно расставлены корабли...");
             }
         }
-        else {
-            editMessageText.setText("Идет расстановка кораблей...");
-            //TODO сделать продолжение текущей расстановки
-        }
-        editMessageText.setMessageId(user.getMessageId());
-        editMessageText.setReplyMarkup(InlineButton.setManuallyPrepareShip(user));
-        user.setEditMessageText(editMessageText);
+        user.setAnswerCallbackQuery(answerCallbackQuery);
         return user;
     }
 }

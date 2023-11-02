@@ -7,6 +7,7 @@ import org.bot0ff.entity.User;
 import org.bot0ff.service.RegistrationService;
 import org.bot0ff.service.UserService;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 
@@ -28,9 +29,6 @@ public class RegistrationServiceImpl implements RegistrationService {
                     Добро пожаловать в "Морской Бой"!
                     Введите имя или оставьте как есть...""");
             sendMessage.setReplyMarkup(InlineButton.registrationButton());
-        }
-        else if(HELP.equals(cmd)) {
-            sendMessage.setText("Помощь");
         }
         else if(CANCEL.equals(cmd)) {
             sendMessage.setText("Введите имя или оставьте как есть...");
@@ -55,18 +53,15 @@ public class RegistrationServiceImpl implements RegistrationService {
 
     //ответы на inline запросы
     @Override
-    public User processRegistrationInline(User user, EditMessageText editMessageText, String cmd) {
+    public User processRegistrationInline(User user, EditMessageText editMessageText, AnswerCallbackQuery answerCallbackQuery, String cmd) {
         if(cmd.equals("/newUserWithCurrentName")) {
             user.setName(user.getName());
             user.setState(ONLINE);
             editMessageText.setText("Выберите действие, " + user.getName());
             editMessageText.setReplyMarkup(InlineButton.changeOptions());
+            user.setEditMessageText(editMessageText);
         }
-        else {
-            editMessageText.setText("Введите имя или оставьте как есть...");
-            editMessageText.setReplyMarkup(InlineButton.registrationButton());
-        }
-        user.setEditMessageText(editMessageText);
+        user.setAnswerCallbackQuery(answerCallbackQuery);
         return user;
     }
 }

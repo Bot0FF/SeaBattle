@@ -8,9 +8,7 @@ import org.bot0ff.dto.ResponseDto;
 import org.bot0ff.entity.User;
 import org.bot0ff.service.UserService;
 import org.springframework.stereotype.Service;
-import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
@@ -32,27 +30,25 @@ public class EndGameController {
     }
 
     //сбрасывает настройки user и отправляет главную страницу по завершению игры
-    public void endGame(Update update) {
+    public void endGameOpponent(Long opponentId) {
         EXECUTOR_SERVICE.execute(() -> {
             try {
+                User opponent = userService.findById(opponentId).orElse(null);
+                if(opponent == null) return;
+
                 TimeUnit.SECONDS.sleep(1);
-                User user = userService.findOrSaveUser(update);
-                var sendMessage = new SendMessage();
-                sendMessage.setChatId(update.getCallbackQuery().getMessage().getChatId());
-                var answerCallbackQuery = new AnswerCallbackQuery();
-                answerCallbackQuery.setCallbackQueryId(update.getCallbackQuery().getId());
-                user.setState(ONLINE);
-                user.setChangeTarget("");
-                user.setActive(false);
-                user.setGameFiled(new ArrayList<>());
-                user.setAiGameFiled(new ArrayList<>());
-                userService.saveUser(user);
-                sendMessage.setText("Выберите действие, " + user.getName());
-                sendMessage.setReplyMarkup(InlineButton.changeOptions());
+                var editMessageText = new EditMessageText();
+                editMessageText.setChatId(opponent.getId());
+                opponent.setState(ONLINE);
+                opponent.setActive(false);
+                opponent.setUserGameFiled(new ArrayList<>());
+                opponent.setOpponentGameFiled(new ArrayList<>());
+                userService.saveUser(opponent);
+                editMessageText.setText("Поражение...\nВыберите действие, " + opponent.getName());
+                editMessageText.setReplyMarkup(InlineButton.changeOptions());
                 var response = ResponseDto.builder()
                         .telegramBot(telegramBot)
-                        .sendMessage(sendMessage)
-                        .answerCallbackQuery(answerCallbackQuery)
+                        .editMessageText(editMessageText)
                         .build();
                 telegramBot.sendAnswer(response);
             } catch (Exception e) {

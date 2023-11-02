@@ -3,8 +3,8 @@ package org.bot0ff.component.button;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.bot0ff.entity.User;
+import org.bot0ff.service.game.GameFiledService;
 import org.bot0ff.service.game.GameMessageService;
-import org.bot0ff.service.game.ManuallyPrepareService;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
@@ -33,14 +33,34 @@ public class InlineButton {
         return markupInline;
     }
 
+    //на главную страницу
+    public static InlineKeyboardMarkup mainPageButton() {
+        List<InlineKeyboardButton> mainPage = new ArrayList<>();
+
+        mainPage.add(new InlineKeyboardButton("На главную"));
+        mainPage.get(0).setCallbackData("/mainPage");
+
+        List<List<InlineKeyboardButton>> rowsInLine = List.of(mainPage);
+        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+        markupInline.setKeyboard(rowsInLine);
+
+        return markupInline;
+    }
+
     //старт новой игры
     public static InlineKeyboardMarkup changeOptions() {
         List<InlineKeyboardButton> newGame = new ArrayList<>();
+        List<InlineKeyboardButton> userStatistic = new ArrayList<>();
+        List<InlineKeyboardButton> help = new ArrayList<>();
 
         newGame.add(new InlineKeyboardButton("Начать новую игру"));
+        userStatistic.add(new InlineKeyboardButton("Статистика"));
+        help.add(new InlineKeyboardButton("Помощь"));
         newGame.get(0).setCallbackData("/newGame");
+        userStatistic.get(0).setCallbackData("/userStatistic");
+        help.get(0).setCallbackData("/help");
 
-        List<List<InlineKeyboardButton>> rowsInLine = List.of(newGame);
+        List<List<InlineKeyboardButton>> rowsInLine = List.of(newGame, userStatistic, help);
         InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
         markupInline.setKeyboard(rowsInLine);
 
@@ -49,39 +69,38 @@ public class InlineButton {
 
     //управление расстановкой кораблей
     public static InlineKeyboardMarkup setManuallyPrepareShip(User user) {
-        int[][] tempUserFiled = ManuallyPrepareService.prepareManuallyMap.get(user.getId());
+        int[][] tempUserFiled = GameFiledService.prepareUserFiledMap.get(user.getId());
         List<List<InlineKeyboardButton>> listButton = new ArrayList<>();
-
 
         for(int ver = 0; ver < GAME_FILED_LENGTH; ver++) {
             for(int hor = 0; hor < GAME_FILED_LENGTH; hor++) {
                 if(hor == 0) {
                     listButton.add(new ArrayList<>());
                 }
-                InlineKeyboardButton thingButton = new InlineKeyboardButton();
+                InlineKeyboardButton button = new InlineKeyboardButton();
                 if(tempUserFiled[ver][hor] == 1) {
-                    thingButton.setText(GameMessageService.emojiPars(":sailboat:"));
+                    button.setText(GameMessageService.emojiPars(":sailboat:"));
                 }
                 else if(tempUserFiled[ver][hor] == 2){
-                    thingButton.setText(GameMessageService.emojiPars(":speedboat:"));
+                    button.setText(GameMessageService.emojiPars(":speedboat:"));
                 }
                 else if(tempUserFiled[ver][hor] == 3){
-                    thingButton.setText(GameMessageService.emojiPars(":ferry:"));
+                    button.setText(GameMessageService.emojiPars(":ferry:"));
                 }
                 else if(tempUserFiled[ver][hor] == 4){
-                    thingButton.setText(GameMessageService.emojiPars(":ship:"));
+                    button.setText(GameMessageService.emojiPars(":ship:"));
                 }
                 else if(tempUserFiled[ver][hor] == 5){
-                    thingButton.setText(GameMessageService.emojiPars(":anchor:"));
+                    button.setText(GameMessageService.emojiPars(":anchor:"));
                 }
                 else if(tempUserFiled[ver][hor] == 6){
-                    thingButton.setText(GameMessageService.emojiPars(":anchor:"));
+                    button.setText(GameMessageService.emojiPars(":anchor:"));
                 }
                 else {
-                    thingButton.setText(" ");
+                    button.setText(" ");
                 }
-                thingButton.setCallbackData(ver + ":" + hor);
-                listButton.get(ver).add(thingButton);
+                button.setCallbackData(ver + ":" + hor);
+                listButton.get(ver).add(button);
             }
         }
 
@@ -118,41 +137,41 @@ public class InlineButton {
         return markupInline;
     }
 
-    //кнопки А-К
-    public static InlineKeyboardMarkup charGameBoard() {
-        List<List<InlineKeyboardButton>> listButton = new ArrayList<>();
-        listButton.add(new ArrayList<>());
-
-        char[] chars = {'А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ж', 'З', 'И' ,'К'};
-        for(int i = 0, a = 0; i < GAME_FILED_LENGTH; i++) {
-            InlineKeyboardButton thingButton = new InlineKeyboardButton(String.valueOf(chars[i]));
-            thingButton.setCallbackData(String.valueOf(chars[i]));
-            listButton.get(a).add(thingButton);
-            if(listButton.get(a).size() > 4) {
-                listButton.add(new ArrayList<>());
-                a++;
+    //активное игровое поле
+    public static InlineKeyboardMarkup gameBoard(List<String> opponentFiled) {
+        int[][] tempArr = new int[GAME_FILED_LENGTH][GAME_FILED_LENGTH];
+        for(String coordinate : opponentFiled) {
+            String[] split;
+            if(coordinate.contains("x")) {
+                split = coordinate.split("x");
+                tempArr[Integer.parseInt(split[0])][Integer.parseInt(split[1])] = -1;
+            }
+            else if(coordinate.contains("o")) {
+                split = coordinate.split("o");
+                tempArr[Integer.parseInt(split[0])][Integer.parseInt(split[1])] = -2;
             }
         }
-
-        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
-        markupInline.setKeyboard(listButton);
-
-        return markupInline;
-    }
-
-    //кнопки 1-10
-    public static InlineKeyboardMarkup numGameBoard() {
         List<List<InlineKeyboardButton>> listButton = new ArrayList<>();
-        listButton.add(new ArrayList<>());
 
-        int[] ints = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-        for(int i = 0, a = 0; i < GAME_FILED_LENGTH; i++) {
-            InlineKeyboardButton thingButton = new InlineKeyboardButton(String.valueOf(ints[i]));
-            thingButton.setCallbackData(String.valueOf(ints[i]));
-            listButton.get(a).add(thingButton);
-            if(listButton.get(a).size() > 4) {
-                listButton.add(new ArrayList<>());
-                a++;
+        for(int ver = 0; ver < GAME_FILED_LENGTH; ver++) {
+            for(int hor = 0; hor < GAME_FILED_LENGTH; hor++) {
+                if(hor == 0) {
+                    listButton.add(new ArrayList<>());
+                }
+                InlineKeyboardButton button = new InlineKeyboardButton();
+                if(tempArr[ver][hor] == -1) {
+                    button.setText(GameMessageService.emojiPars(":red_circle:"));
+                    button.setCallbackData(ver + "x" + hor);
+                }
+                else if(tempArr[ver][hor] == -2){
+                    button.setText(GameMessageService.emojiPars(":white_circle:"));
+                    button.setCallbackData(ver + "o" + hor);
+                }
+                else {
+                    button.setText(" ");
+                    button.setCallbackData(ver + ":" + hor);
+                }
+                listButton.get(ver).add(button);
             }
         }
 

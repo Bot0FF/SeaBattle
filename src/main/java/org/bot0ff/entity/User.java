@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 
@@ -32,17 +33,14 @@ public class User {
     @Enumerated(EnumType.STRING)
     private UserState state;
 
-    @Column(name = "game_id")
-    private Long gameId;
+    @Column(name = "opponent_id")
+    private Long opponentId;
 
-    @Column(name = "game_filed")
-    private List<String> gameFiled;
+    @Column(name = "user_game_filed")
+    private List<String> userGameFiled;
 
-    @Column(name = "ai_game_filed")
-    private List<String> aiGameFiled;
-
-    @Column(name = "change_target")
-    private String changeTarget;
+    @Column(name = "opponent_game_filed")
+    private List<String> opponentGameFiled;
 
     @Column(name = "is_active")
     private boolean isActive;
@@ -55,4 +53,7 @@ public class User {
 
     @Transient
     private EditMessageText editMessageText;
+
+    @Transient
+    private AnswerCallbackQuery answerCallbackQuery;
 }

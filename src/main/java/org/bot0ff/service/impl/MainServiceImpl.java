@@ -5,6 +5,7 @@ import lombok.extern.log4j.Log4j;
 import org.bot0ff.component.TelegramBot;
 import org.bot0ff.dto.ResponseDto;
 import org.bot0ff.service.*;
+import org.bot0ff.service.game.GameService;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -101,7 +102,7 @@ public class MainServiceImpl implements MainService {
         answerCallbackQuery.setCallbackQueryId(update.getCallbackQuery().getId());
 
         if(WAIT_REGISTRATION.equals(userState)) {
-            var updateUser = registrationService.processRegistrationInline(user, editMessageText, inputMessage);
+            var updateUser = registrationService.processRegistrationInline(user, editMessageText, answerCallbackQuery, inputMessage);
             var response = ResponseDto.builder()
                     .telegramBot(telegramBot)
                     .editMessageText(updateUser.getEditMessageText())
@@ -110,7 +111,7 @@ public class MainServiceImpl implements MainService {
             telegramBot.sendAnswer(response);
         }
         else if(ONLINE.equals(userState)) {
-            var updateUser = activityService.changeOptions(user, editMessageText, inputMessage);
+            var updateUser = activityService.changeOptions(user, editMessageText, answerCallbackQuery, inputMessage);
             var response = ResponseDto.builder()
                     .telegramBot(telegramBot)
                     .editMessageText(updateUser.getEditMessageText())
@@ -119,29 +120,29 @@ public class MainServiceImpl implements MainService {
             telegramBot.sendAnswer(response);
         }
         else if(PREPARE_GAME.equals(userState)) {
-            var updateUser = prepareGameService.optionsPrepareGameInline(user, editMessageText, inputMessage);
+            var updateUser = prepareGameService.optionsPrepareGameInline(user, editMessageText, answerCallbackQuery, inputMessage);
             var response = ResponseDto.builder()
                     .telegramBot(telegramBot)
                     .editMessageText(updateUser.getEditMessageText())
-                    .answerCallbackQuery(answerCallbackQuery)
+                    .answerCallbackQuery(updateUser.getAnswerCallbackQuery())
                     .build();
             telegramBot.sendAnswer(response);
         }
         else if(SEARCH_GAME.equals(userState)) {
-            var updateUser = searchGameService.stopSearchGame(user, editMessageText, inputMessage);
+            var updateUser = searchGameService.searchGameInline(user, editMessageText, answerCallbackQuery, inputMessage);
             var response = ResponseDto.builder()
                     .telegramBot(telegramBot)
                     .editMessageText(updateUser.getEditMessageText())
-                    .answerCallbackQuery(answerCallbackQuery)
+                    .answerCallbackQuery(updateUser.getAnswerCallbackQuery())
                     .build();
             telegramBot.sendAnswer(response);
         }
         else if(IN_GAME.equals(userState)) {
-            var updateUser = inGameService.processCallbackQuery(update, user, editMessageText, inputMessage);
+            var updateUser = inGameService.processCallbackQuery(update, user, editMessageText, answerCallbackQuery, inputMessage);
             var response = ResponseDto.builder()
                     .telegramBot(telegramBot)
                     .editMessageText(updateUser.getEditMessageText())
-                    .answerCallbackQuery(answerCallbackQuery)
+                    .answerCallbackQuery(updateUser.getAnswerCallbackQuery())
                     .build();
             telegramBot.sendAnswer(response);
         }

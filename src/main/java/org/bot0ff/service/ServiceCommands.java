@@ -2,8 +2,7 @@ package org.bot0ff.service;
 
 public enum ServiceCommands {
     START("/start"),
-    CANCEL("/cancel"),
-    HELP("/help");
+    CANCEL("/cancel");
 
     private final String cmd;
 

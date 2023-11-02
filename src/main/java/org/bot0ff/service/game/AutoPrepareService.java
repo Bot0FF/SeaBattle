@@ -6,9 +6,6 @@ import org.apache.commons.math3.random.RandomDataGenerator;
 import org.bot0ff.entity.User;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static org.bot0ff.util.Constants.GAME_FILED_LENGTH;
 
 /**
@@ -18,80 +15,75 @@ import static org.bot0ff.util.Constants.GAME_FILED_LENGTH;
     3. При создании корабля в методе getShip выбирается тип корабля - вертикальный или горизонтальный
     4. После определения типа выбирается случайная стартовая позиция с учетом длины корабля (напр. если тип вертикальный, длина 4,
         то максимальная случайная стартовая позиция по вертикали будет 10 - 4)
-    5. При создании корабля сам корабль отмечается значением 2, все квадраты вокруг него значением 1 и позиция корабля и координат вокруг него сохраняются в массив.
+    5. При создании корабля сам корабль отмечается значением, соответствующим типу корабля, все квадраты вокруг него значением 6 и позиция корабля и координат вокруг него сохраняются в массив.
     6. При создании корабля с уже имеющимися в массиве другими кораблями, сначала определяется стартовая точка таким образом,
         чтобы вся длина корабля не попадала на занятые другими кораблями координаты, отмеченными 1 или 2.
+    7. Если при расстановке нет возможности разместить очередной корабль на поле, расстановка начинается заново.
  **/
 
 @Log4j
 @Service
 @RequiredArgsConstructor
 public class AutoPrepareService {
-    private final ManuallyPrepareService manuallyPrepareService;
+    private final GameFiledService gameFiledService;
 
     //TODO оптимизация расстановки, если нет свободных мест для корабля, зависает в цикле
     public void setAutoUserGameFiled(User user) {
-        int[][] userFiled = ManuallyPrepareService.prepareManuallyMap.get(user.getId());
+        int[][] userGameFiled = GameFiledService.prepareUserFiledMap.get(user.getId());
 
         //очистка поля перед автоматической расстановкой
         for (int ver = 0; ver < GAME_FILED_LENGTH; ver++) { //буквы по вертикали
             for (int hor = 0; hor < GAME_FILED_LENGTH; hor++) { //цифры по горизонтали
-                userFiled[ver][hor] = 0;
+                userGameFiled[ver][hor] = 0;
             }
         }
 
-        while (!manuallyPrepareService.checkPreparedShips(userFiled)) {
+        while (!gameFiledService.checkPreparedShips(userGameFiled)) {
             for (int ver = 0; ver < GAME_FILED_LENGTH; ver++) { //буквы по вертикали
                 for (int hor = 0; hor < GAME_FILED_LENGTH; hor++) { //цифры по горизонтали
-                    userFiled[ver][hor] = 0;
+                    userGameFiled[ver][hor] = 0;
                 }
             }
-            setShip(4, userFiled);
+            setShip(4, userGameFiled);
 
-            setShip(3, userFiled);
-            setShip(3, userFiled);
+            setShip(3, userGameFiled);
+            setShip(3, userGameFiled);
 
-            setShip(2, userFiled);
-            setShip(2, userFiled);
-            setShip(2, userFiled);
+            setShip(2, userGameFiled);
+            setShip(2, userGameFiled);
+            setShip(2, userGameFiled);
 
-            setShip(1, userFiled);
-            setShip(1, userFiled);
-            setShip(1, userFiled);
-            setShip(1, userFiled);
+            setShip(1, userGameFiled);
+            setShip(1, userGameFiled);
+            setShip(1, userGameFiled);
+            setShip(1, userGameFiled);
         }
     }
 
-    public List<String> setAutoAiGameFiled() {
-        List<String> resultFiled = new ArrayList<>();
-        int[][] aiFiled = new int[GAME_FILED_LENGTH][GAME_FILED_LENGTH];
+    public int[][] setAutoAiGameFiled() {
+        int[][] aiGameFiled = new int[GAME_FILED_LENGTH][GAME_FILED_LENGTH];
 
-        setShip(1, aiFiled);
-        setShip(1, aiFiled);
-        setShip(1, aiFiled);
-        setShip(1, aiFiled);
-
-        setShip(2, aiFiled);
-        setShip(2, aiFiled);
-        setShip(2, aiFiled);
-
-        setShip(3, aiFiled);
-        setShip(3, aiFiled);
-
-        setShip(4, aiFiled);
-
-        //заполняет оставшиеся координаты в поле
-        for(int ver = 0; ver < GAME_FILED_LENGTH; ver++) { //буквы по вертикали
-            for(int hor = 0; hor < GAME_FILED_LENGTH; hor++) { //цифры по горизонтали
-                String exist = ver + ":" + hor;
-                String notExist = ver + "_" + hor;
-                if(resultFiled.stream().noneMatch(coordinates -> coordinates.equals(exist))) {
-                    resultFiled.add(notExist);
+        while (!gameFiledService.checkPreparedShips(aiGameFiled)) {
+            for (int ver = 0; ver < GAME_FILED_LENGTH; ver++) { //буквы по вертикали
+                for (int hor = 0; hor < GAME_FILED_LENGTH; hor++) { //цифры по горизонтали
+                    aiGameFiled[ver][hor] = 0;
                 }
             }
-        }
+            setShip(4, aiGameFiled);
 
-        return resultFiled;
+            setShip(3, aiGameFiled);
+            setShip(3, aiGameFiled);
+
+            setShip(2, aiGameFiled);
+            setShip(2, aiGameFiled);
+            setShip(2, aiGameFiled);
+
+            setShip(1, aiGameFiled);
+            setShip(1, aiGameFiled);
+            setShip(1, aiGameFiled);
+            setShip(1, aiGameFiled);
+        }
+        return aiGameFiled;
     }
 
     public void setShip(int shipType, int[][] gameFiled) {
@@ -248,8 +240,6 @@ public class AutoPrepareService {
             }
         }
     }
-
-
 
     //рандом 0-9
     private int getRNum(int shipLength) {

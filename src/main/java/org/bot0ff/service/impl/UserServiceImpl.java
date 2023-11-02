@@ -10,11 +10,17 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+
+    @Override
+    public Optional<User> findById(Long userId) {
+        return userRepository.findById(userId);
+    }
 
     @Override
     public User findOrSaveUser(Update update) {
@@ -33,10 +39,9 @@ public class UserServiceImpl implements UserService {
                     .name(telegramUser.getUserName())
                     .registerDate(LocalDateTime.now())
                     .state(UserState.WAIT_REGISTRATION)
-                    .gameFiled(new ArrayList<>())
-                    .aiGameFiled(new ArrayList<>())
-                    .gameId(0L)
-                    .changeTarget("")
+                    .userGameFiled(new ArrayList<>())
+                    .opponentGameFiled(new ArrayList<>())
+                    .opponentId(0L)
                     .isActive(false)
                     .build();
             return userRepository.save(newUser);

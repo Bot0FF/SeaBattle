@@ -6,63 +6,54 @@ import org.bot0ff.entity.User;
 import org.bot0ff.service.UserService;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.Arrays;
+
+import static org.bot0ff.util.Constants.GAME_FILED_LENGTH;
 
 @Log4j
 @Service
 @RequiredArgsConstructor
 public class GameService {
     private final UserService userService;
+    private final GameFiledService gameFiledService;
 
     //проверяет попадание user
-    public int checkUserStep(String userChangeTarget, User user) {
-        String[] split = userChangeTarget.split(":");
-        switch (split[0]) {
-            case "А" -> split[0] = "0";
-            case "Б" -> split[0] = "1";
-            case "В" -> split[0] = "2";
-            case "Г" -> split[0] = "3";
-            case "Д" -> split[0] = "4";
-            case "Е" -> split[0] = "5";
-            case "Ж" -> split[0] = "6";
-            case "З" -> split[0] = "7";
-            case "И" -> split[0] = "8";
-            case "К" -> split[0] = "9";
-        }
-        switch (split[1]) {
-            case "1" -> split[1] = "0";
-            case "2" -> split[1] = "1";
-            case "3" -> split[1] = "2";
-            case "4" -> split[1] = "3";
-            case "5" -> split[1] = "4";
-            case "6" -> split[1] = "5";
-            case "7" -> split[1] = "6";
-            case "8" -> split[1] = "7";
-            case "9" -> split[1] = "8";
-            case "10" -> split[1] = "9";
-        }
-        String existShip = split[0] + ":" + split[1];
-        String notExistShip = split[0] + "_" + split[1];
-        List<String> userAiFiled = user.getAiGameFiled();
-        int result = 0;
-        for (String coordinate : userAiFiled) {
-            if(coordinate.equals(existShip)) {
-                userAiFiled = userAiFiled.stream().map(target -> target.equals(existShip) ? (split[0] + "-" + split[1]) : target).toList();
-                user.setAiGameFiled(userAiFiled);
-                result = 1;
-            }
-            else if(coordinate.equals(notExistShip)) {
-                userAiFiled = userAiFiled.stream().map(target -> target.equals(notExistShip) ? (split[0] + "/" + split[1]) : target).toList();
-                user.setActive(false);
-                user.setAiGameFiled(userAiFiled);
-                result = 0;
+    public int checkUserStep(String userTarget, User user) {
+        int result;
+        String[] split = userTarget.split(":");
+        int[][] opponentGameFiled = gameFiledService.convertListFiledToArr(user.getOpponentGameFiled());
+        int targetVer = Integer.parseInt(split[0]);
+        int targetHor = Integer.parseInt(split[1]);
+
+        //проверка наличия не подбитых кораблей opponent
+        int countShips = 0;
+        for(int ver = 0; ver < GAME_FILED_LENGTH; ver++) {
+            for(int hor = 0; hor < GAME_FILED_LENGTH; hor++) {
+                if(opponentGameFiled[ver][hor] == 1
+                        | opponentGameFiled[ver][hor] == 2
+                        | opponentGameFiled[ver][hor] == 3
+                        | opponentGameFiled[ver][hor] == 4) {
+                    countShips++;
+                }
             }
         }
-        //проверка на оставшиеся корабли
-        if(userAiFiled.stream().noneMatch(aliveShip -> aliveShip.contains(":"))) {
+
+        if(countShips < 1) {
             result = -1;
         }
-        user.setChangeTarget("");
+        else if(opponentGameFiled[targetVer][targetHor] == 1
+                | opponentGameFiled[targetVer][targetHor] == 2
+                | opponentGameFiled[targetVer][targetHor] == 3
+                | opponentGameFiled[targetVer][targetHor] == 4) {
+            user.setOpponentGameFiled(gameFiledService.convertArrFiledToList(opponentGameFiled));
+            opponentGameFiled[targetVer][targetHor] = -1;
+            result = 1;
+        }
+        else {
+            opponentGameFiled[targetVer][targetHor] = -2;
+            user.setOpponentGameFiled(gameFiledService.convertArrFiledToList(opponentGameFiled));
+            result = 0;
+        }
         userService.saveUser(user);
         return result;
     }
