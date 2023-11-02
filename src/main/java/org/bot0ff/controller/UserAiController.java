@@ -88,33 +88,16 @@ public class UserAiController {
     //проверяет попадание ИИ
     private int checkAiStep(User user) {
         int result;
-        int targetVer = getRNum();
-        int targetHor = getRNum();
-
         int[][] userGameFiled = gameFiledService.convertListFiledToArr(user.getUserGameFiled());
+        int targetVer;
+        int targetHor;
 
-        //проверка наличия оставшихся кораблей user
-        int countShips = 0;
-        for(int ver = 0; ver < GAME_FILED_LENGTH; ver++) {
-            for(int hor = 0; hor < GAME_FILED_LENGTH; hor++) {
-                if(userGameFiled[ver][hor] == 1
-                        | userGameFiled[ver][hor] == 2
-                        | userGameFiled[ver][hor] == 3
-                        | userGameFiled[ver][hor] == 4) {
-                    countShips++;
-                }
-            }
-        }
+        do {
+            targetVer = getRNum();
+            targetHor = getRNum();
+        } while (userGameFiled[targetVer][targetHor] == -1 | userGameFiled[targetVer][targetHor] == -2);
 
-        if(countShips < 1) {
-            user.setState(ONLINE);
-            user.setActive(false);
-            user.setOpponentId(0L);
-            user.setUserGameFiled(new ArrayList<>());
-            user.setOpponentGameFiled(new ArrayList<>());
-            result = -1;
-        }
-        else if(userGameFiled[targetVer][targetHor] == 1
+        if(userGameFiled[targetVer][targetHor] == 1
                 | userGameFiled[targetVer][targetHor] == 2
                 | userGameFiled[targetVer][targetHor] == 3
                 | userGameFiled[targetVer][targetHor] == 4) {
@@ -128,6 +111,28 @@ public class UserAiController {
             user.setUserGameFiled(gameFiledService.convertArrFiledToList(userGameFiled));
             result = 0;
         }
+
+        //проверка наличия оставшихся кораблей user
+        int countShips = 0;
+        for(int ver = 0; ver < GAME_FILED_LENGTH; ver++) {
+            for(int hor = 0; hor < GAME_FILED_LENGTH; hor++) {
+                if(userGameFiled[ver][hor] == 1
+                        | userGameFiled[ver][hor] == 2
+                        | userGameFiled[ver][hor] == 3
+                        | userGameFiled[ver][hor] == 4) {
+                    countShips++;
+                }
+            }
+        }
+        if(countShips < 1) {
+            user.setState(ONLINE);
+            user.setActive(false);
+            user.setOpponentId(0L);
+            user.setUserGameFiled(new ArrayList<>());
+            user.setOpponentGameFiled(new ArrayList<>());
+            result = -1;
+        }
+
         userService.saveUser(user);
         return result;
     }

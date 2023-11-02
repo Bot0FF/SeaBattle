@@ -37,7 +37,6 @@ public class GameFiledService {
                 }
             }
         }
-
         return oneDeckShip == 4 && twoDeckShip == 6 && threeDeckShip == 6 && fourDeckShip == 4;
     }
 

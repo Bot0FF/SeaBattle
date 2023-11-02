@@ -25,22 +25,6 @@ public class GameService {
         int targetVer = Integer.parseInt(split[0]);
         int targetHor = Integer.parseInt(split[1]);
 
-        //проверка наличия не подбитых кораблей opponent
-        int countShips = 0;
-        for(int ver = 0; ver < GAME_FILED_LENGTH; ver++) {
-            for(int hor = 0; hor < GAME_FILED_LENGTH; hor++) {
-                if(opponentGameFiled[ver][hor] == 1
-                        | opponentGameFiled[ver][hor] == 2
-                        | opponentGameFiled[ver][hor] == 3
-                        | opponentGameFiled[ver][hor] == 4) {
-                    countShips++;
-                }
-            }
-        }
-
-        if(countShips < 1) {
-            return -1;
-        }
         if(opponentGameFiled[targetVer][targetHor] == 1
                 | opponentGameFiled[targetVer][targetHor] == 2
                 | opponentGameFiled[targetVer][targetHor] == 3
@@ -54,6 +38,23 @@ public class GameService {
             user.setOpponentGameFiled(gameFiledService.convertArrFiledToList(opponentGameFiled));
             result = 0;
         }
+
+        //проверка наличия не подбитых кораблей opponent
+        int countShips = 0;
+        for(int ver = 0; ver < GAME_FILED_LENGTH; ver++) {
+            for(int hor = 0; hor < GAME_FILED_LENGTH; hor++) {
+                if(opponentGameFiled[ver][hor] == 1
+                        | opponentGameFiled[ver][hor] == 2
+                        | opponentGameFiled[ver][hor] == 3
+                        | opponentGameFiled[ver][hor] == 4) {
+                    countShips++;
+                }
+            }
+        }
+        if(countShips < 1) {
+            return -1;
+        }
+
         userService.saveUser(user);
         return result;
     }

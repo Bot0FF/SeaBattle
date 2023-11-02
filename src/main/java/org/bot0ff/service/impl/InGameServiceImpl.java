@@ -89,6 +89,7 @@ public class InGameServiceImpl implements InGameService {
                 user.setOpponentGameFiled(new ArrayList<>());
                 editMessageText.setText("Победа!\nВыберите действие, " + user.getName());
                 editMessageText.setReplyMarkup(InlineButton.changeOptions());
+                user.setEditMessageText(editMessageText);
                 endGameController.endGameOpponent(user.getOpponentId());
             }
         }
