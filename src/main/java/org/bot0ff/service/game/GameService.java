@@ -6,8 +6,6 @@ import org.bot0ff.entity.User;
 import org.bot0ff.service.UserService;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-
 import static org.bot0ff.util.Constants.GAME_FILED_LENGTH;
 
 @Log4j

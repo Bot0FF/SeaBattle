@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j;
 import org.bot0ff.component.button.TextButton;
 import org.bot0ff.controller.EndGameController;
+import org.bot0ff.controller.JoinUserController;
 import org.bot0ff.controller.UpdateController;
 import org.bot0ff.dto.ResponseDto;
 import org.bot0ff.controller.UserAiController;
@@ -29,12 +30,14 @@ public class TelegramBot extends TelegramLongPollingBot {
     private final UpdateController updateController;
     private final UserAiController userAiController;
     private final EndGameController endGameController;
+    private final JoinUserController joinUserController;
 
     @PostConstruct
     private void init() {
         updateController.registerBot(this);
         userAiController.registerBot(this);
         endGameController.registerBot(this);
+        joinUserController.registerBot(this);
         try {
             this.execute(new SetMyCommands(TextButton.commandMarkup(), new BotCommandScopeDefault(), null));
         } catch (TelegramApiException e) {

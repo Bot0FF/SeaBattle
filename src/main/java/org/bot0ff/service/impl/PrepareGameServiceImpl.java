@@ -3,12 +3,10 @@ package org.bot0ff.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j;
 import org.bot0ff.component.button.InlineButton;
+import org.bot0ff.controller.JoinUserController;
 import org.bot0ff.entity.User;
 import org.bot0ff.service.PrepareGameService;
-import org.bot0ff.service.game.AutoPrepareService;
-import org.bot0ff.service.game.GameFiledService;
-import org.bot0ff.service.game.GameMessageService;
-import org.bot0ff.service.game.ManuallyPrepareService;
+import org.bot0ff.service.game.*;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -24,6 +22,7 @@ import static org.bot0ff.service.ServiceCommands.*;
 public class PrepareGameServiceImpl implements PrepareGameService {
     private final ManuallyPrepareService manuallyPrepareService;
     private final AutoPrepareService autoPrepareService;
+    private final JoinUserController joinUserController;
     private final GameFiledService gameFiledService;
     private final GameMessageService gameMessageService;
 
@@ -67,6 +66,7 @@ public class PrepareGameServiceImpl implements PrepareGameService {
         else if(cmd.equals("/searchGameVsUser")) {
             if(gameFiledService.checkPreparedShips(GameFiledService.prepareUserFiledMap.get(user.getId()))) {
                 user.setState(SEARCH_GAME);
+                JoinUserController.joinUserMap.put(user.getId(), user);
                 editMessageText.setText("Поиск противника...");
                 user.setEditMessageText(editMessageText);
             }
