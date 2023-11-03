@@ -14,16 +14,18 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-import static org.bot0ff.entity.UserState.ONLINE;
-import static org.bot0ff.entity.UserState.PREPARE_GAME;
+import static org.bot0ff.entity.UserState.*;
 import static org.bot0ff.util.Constants.GAME_FILED_LENGTH;
 
 @Log4j
 @Service
 @RequiredArgsConstructor
 public class JoinUserController {
-    public static Map<Long, User> joinUserMap = Collections.synchronizedMap(new HashMap<>());
+    private static ExecutorService EXECUTOR_SERVICE = Executors.newCachedThreadPool();
+    public static final Map<Long, User> joinUserMap = Collections.synchronizedMap(new HashMap<>());
     private TelegramBot telegramBot;
     private final UserService userService;
 
@@ -47,7 +49,7 @@ public class JoinUserController {
             editMessageText.setText("Противник не найден...");
             editMessageText.setReplyMarkup(InlineButton.setManuallyPrepareShip(userOne));
             userService.saveUser(userOne);
-            joinUserMap.remove(userIdOne);
+            removeUserFromMap(userOne);
             var response = ResponseDto.builder()
                     .telegramBot(telegramBot)
                     .editMessageText(editMessageText)
@@ -55,15 +57,55 @@ public class JoinUserController {
             telegramBot.sendAnswer(response);
         }
         else if(joinUserMap.size() > 1){
-            Long userIdOne = randomKey.get(getRNum(randomKey.size()));
-            Long userIdTwo = randomKey.get(getRNum(randomKey.size()));
-            User userOne = joinUserMap.get(userIdOne);
-            User userTwo = joinUserMap.get(userIdTwo);
+            while (joinUserMap.size() > 1) {
+                EXECUTOR_SERVICE.execute(() -> {
+                    Long userIdOne = randomKey.get(getRNum(randomKey.size()));
+                    Long userIdTwo = randomKey.get(getRNum(randomKey.size()));
+                    User userOne = userService.findById(userIdOne).orElse(null);
+                    User userTwo = userService.findById(userIdTwo).orElse(null);
+                    int firstStep = getFirstStep();
+                    if(userOne != null && userTwo != null
+                            && userOne.getState().equals(SEARCH_GAME)
+                            && userTwo.getState().equals(SEARCH_GAME)) {
+                        if(firstStep == 1) {
+                            userOne.setActive(true);
+                        }
+                        else {
+                            userTwo.setActive(true);
+                        }
+                        userOne.setState(IN_GAME);
+                        userTwo.setState(IN_GAME);
+                        userOne.setOpponentGameFiled(userTwo.getUserGameFiled());
+                        userTwo.setOpponentGameFiled(userOne.getUserGameFiled());
+                        userService.saveUser(userOne);
+                        userService.saveUser(userTwo);
+                    }
+                    else {
+                        if(userOne != null && !userOne.getState().equals(SEARCH_GAME)) {
+                            removeUserFromMap(userOne);
+                        }
+                        if(userTwo != null && !userTwo.getState().equals(SEARCH_GAME)) {
+                            removeUserFromMap(userTwo);
+                        }
+                    }
+                });
+            }
+        }
+    }
+
+    public static void removeUserFromMap(User user) {
+        synchronized (joinUserMap) {
+            joinUserMap.remove(user.getId());
         }
     }
 
     private int getRNum(int mapSize) {
         RandomDataGenerator randomGenerator = new RandomDataGenerator();
         return randomGenerator.nextInt(0, mapSize - 1);
+    }
+
+    private int getFirstStep() {
+        RandomDataGenerator randomGenerator = new RandomDataGenerator();
+        return randomGenerator.nextInt(1, 2);
     }
 }
