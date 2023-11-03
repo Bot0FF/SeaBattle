@@ -1,6 +1,7 @@
 package org.bot0ff.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.bot0ff.entity.User;
 import org.bot0ff.entity.UserState;
 import org.bot0ff.repository.UserRepository;
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
@@ -46,6 +48,7 @@ public class UserServiceImpl implements UserService {
                     .countVictory(0)
                     .countLoss(0)
                     .build();
+            log.info("Новый пользователь: " + newUser);
             return userRepository.save(newUser);
         }
         return persistentUser;
