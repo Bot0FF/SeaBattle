@@ -47,9 +47,10 @@ public class ActivityServiceImpl implements ActivityService {
             editMessageText.setReplyMarkup(InlineButton.setManuallyPrepareShip(user));
             user.setEditMessageText(editMessageText);
         }
-        //TODO сделать статистику
+        //TODO сделать статистику по всем
         else if(cmd.equals("/userStatistic")) {
-            editMessageText.setText("Статистика игрока " + user.getName());
+            editMessageText.setText(String.format("Статистика игрока %s \nПобед: %d \nПоражений: %d",
+                    user.getName(), user.getCountVictory(), user.getCountLoss()));
             editMessageText.setReplyMarkup(InlineButton.mainPageButton());
             user.setEditMessageText(editMessageText);
         }

@@ -23,7 +23,7 @@ public class TelegramBotInit {
             TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
             telegramBotsApi.registerBot((telegramBot));
         } catch (TelegramApiException e) {
-            log.error(e.getMessage());
+            log.error("TelegramBotInit - Ошибка при инициализации TelegramBot: " + e.getMessage());
         }
     }
 }

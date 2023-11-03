@@ -123,20 +123,6 @@ public class InlineButton {
         return markupInline;
     }
 
-    //отменить поиск противника
-    public static InlineKeyboardMarkup stopSearchGameButton() {
-        List<InlineKeyboardButton> stopSearchGame = new ArrayList<>();
-
-        stopSearchGame.add(new InlineKeyboardButton("Отменить поиск сражения"));
-        stopSearchGame.get(0).setCallbackData("/stopSearchGame");
-
-        List<List<InlineKeyboardButton>> rowsInLine = List.of(stopSearchGame);
-        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
-        markupInline.setKeyboard(rowsInLine);
-
-        return markupInline;
-    }
-
     //активное игровое поле
     public static InlineKeyboardMarkup gameBoard(List<String> opponentFiled) {
         int[][] tempArr = new int[GAME_FILED_LENGTH][GAME_FILED_LENGTH];

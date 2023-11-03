@@ -15,7 +15,6 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 @Log4j
 @Service
@@ -56,7 +55,7 @@ public class UserUserController {
                         .build();
                 telegramBot.sendAnswer(response);
             }catch (Exception e) {
-                e.printStackTrace();
+                log.error("UserUserController - Ошибка при отправке сообщения при игре против User: " + e.getMessage());
             }
         });
     }

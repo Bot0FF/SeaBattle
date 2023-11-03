@@ -48,6 +48,12 @@ public class User {
     @Column(name = "messageId")
     private Integer messageId;
 
+    @Column(name = "countVictory")
+    private Integer countVictory;
+
+    @Column(name = "countLoss")
+    private Integer countLoss;
+
     @Transient
     private SendMessage sendMessage;
 

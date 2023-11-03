@@ -5,7 +5,6 @@ import lombok.extern.log4j.Log4j;
 import org.bot0ff.component.TelegramBot;
 import org.bot0ff.dto.ResponseDto;
 import org.bot0ff.service.*;
-import org.bot0ff.service.game.GameService;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;

@@ -60,31 +60,19 @@ public class JoinUserController {
             Long userIdTwo = randomKey.get(getRNum(randomKey.size()));
             User userOne = joinUserMap.get(userIdOne);
             User userTwo = joinUserMap.get(userIdTwo);
-            int firstStep = getFirstStep();
             if(userOne != null && userTwo != null
                     && userOne.getState().equals(SEARCH_GAME)
                     && userTwo.getState().equals(SEARCH_GAME)) {
-                if(firstStep == 1) {
-                    userOne.setActive(true);
-                }
-                else {
-                    userTwo.setActive(true);
-                }
 
-                String notificationOne;
-                if(userOne.isActive()) {
-                    notificationOne = "Ваш ход...";
-                }
-                else {
-                    notificationOne = "Ход противника...";
-                }
+                //сообщение для UserOne
                 userOne.setState(IN_GAME);
+                userOne.setActive(true);
                 userOne.setOpponentId(userIdTwo);
                 userOne.setOpponentGameFiled(userTwo.getUserGameFiled());
                 editMessageTextForOne.setChatId(userIdOne);
                 editMessageTextForOne.setMessageId(userOne.getMessageId());
                 editMessageTextForOne.setText(gameMessageService
-                        .getCurrentGameFiled(notificationOne, gameFiledService.convertListFiledToArr(userOne.getUserGameFiled())));
+                        .getCurrentGameFiled("Ваш ход...", gameFiledService.convertListFiledToArr(userOne.getUserGameFiled())));
                 editMessageTextForOne.setReplyMarkup(InlineButton.gameBoard(userOne.getOpponentGameFiled()));
                 userOne.setEditMessageText(editMessageTextForOne);
                 userService.saveUser(userOne);
@@ -94,20 +82,15 @@ public class JoinUserController {
                         .build();
                 telegramBot.sendAnswer(responseOne);
 
-                String notificationTwo;
-                if(userOne.isActive()) {
-                    notificationTwo = "Ваш ход...";
-                }
-                else {
-                    notificationTwo = "Ход противника...";
-                }
+                //сообщение для UserTwo
                 userTwo.setState(IN_GAME);
+                userTwo.setActive(false);
                 userTwo.setOpponentId(userIdOne);
                 userTwo.setOpponentGameFiled(userOne.getUserGameFiled());
                 editMessageTextForTwo.setChatId(userIdTwo);
                 editMessageTextForTwo.setMessageId(userTwo.getMessageId());
                 editMessageTextForTwo.setText(gameMessageService
-                        .getCurrentGameFiled(notificationTwo, gameFiledService.convertListFiledToArr(userTwo.getUserGameFiled())));
+                        .getCurrentGameFiled("Ход противника...", gameFiledService.convertListFiledToArr(userTwo.getUserGameFiled())));
                 editMessageTextForTwo.setReplyMarkup(InlineButton.gameBoard(userTwo.getOpponentGameFiled()));
                 userTwo.setEditMessageText(editMessageTextForTwo);
                 var responseTwo = ResponseDto.builder()
@@ -140,10 +123,5 @@ public class JoinUserController {
     private int getRNum(int mapSize) {
         RandomDataGenerator randomGenerator = new RandomDataGenerator();
         return randomGenerator.nextInt(0, mapSize - 1);
-    }
-
-    private int getFirstStep() {
-        RandomDataGenerator randomGenerator = new RandomDataGenerator();
-        return randomGenerator.nextInt(1, 2);
     }
 }

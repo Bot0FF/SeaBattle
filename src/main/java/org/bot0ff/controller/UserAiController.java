@@ -57,7 +57,7 @@ public class UserAiController {
                 do {
                     User usr = userService.findOrSaveUser(update);
                     TimeUnit.SECONDS.sleep(2);
-                    checkAiStep = checkAiStep(usr);
+                    checkAiStep = setAiStep(usr);
                     if(checkAiStep == 1) {
                         editMessageText.setText(gameMessageService
                                 .getCurrentGameFiled("Противник попал и продолжает...", gameFiledService.convertListFiledToArr(usr.getUserGameFiled())));
@@ -80,13 +80,13 @@ public class UserAiController {
                 }
                 while (checkAiStep == 1);
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("UserAiController - Ошибка при отправке сообщения при игре против ИИ: " + e.getMessage());
             }
         });
     }
 
-    //проверяет попадание ИИ
-    private int checkAiStep(User user) {
+    //реализация хода ИИ
+    private int setAiStep(User user) {
         int result;
         int[][] userGameFiled = gameFiledService.convertListFiledToArr(user.getUserGameFiled());
         int targetVer;
@@ -130,6 +130,7 @@ public class UserAiController {
             user.setOpponentId(0L);
             user.setUserGameFiled(new ArrayList<>());
             user.setOpponentGameFiled(new ArrayList<>());
+            user.setCountLoss(user.getCountLoss() + 1);
             result = -1;
         }
 

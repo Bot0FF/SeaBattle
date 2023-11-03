@@ -29,7 +29,7 @@ public class EndGameController {
         this.telegramBot = telegramBot;
     }
 
-    //сбрасывает настройки user и отправляет главную страницу по завершению игры
+    //сбрасывает настройки user и отправляет главную страницу в случае поражения
     public void endGameOpponent(Long opponentId) {
         EXECUTOR_SERVICE.execute(() -> {
             try {
@@ -45,6 +45,7 @@ public class EndGameController {
                 opponent.setOpponentId(0L);
                 opponent.setUserGameFiled(new ArrayList<>());
                 opponent.setOpponentGameFiled(new ArrayList<>());
+                opponent.setCountLoss(opponent.getCountLoss() + 1);
                 userService.saveUser(opponent);
                 editMessageText.setText("Поражение...\nВыберите действие, " + opponent.getName());
                 editMessageText.setReplyMarkup(InlineButton.changeOptions());
@@ -54,7 +55,7 @@ public class EndGameController {
                         .build();
                 telegramBot.sendAnswer(response);
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("EndGameController - Ошибка при отправке сообщения проигравшему игроку: " + e.getMessage());
             }
         });
     }

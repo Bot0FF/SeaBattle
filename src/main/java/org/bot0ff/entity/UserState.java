@@ -6,5 +6,4 @@ public enum UserState {
     PREPARE_GAME, //в статусе подготовки игры
     SEARCH_GAME, //ожидает поиска противника
     IN_GAME, //в стадии игры
-    OFFLINE; //в статусе офлайн
 }

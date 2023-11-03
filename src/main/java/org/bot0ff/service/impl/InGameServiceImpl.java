@@ -64,8 +64,9 @@ public class InGameServiceImpl implements InGameService {
     @Override
     public User processCallbackQuery(Update update, User user, EditMessageText editMessageText, AnswerCallbackQuery answerCallbackQuery, String cmd) {
         if(user.isActive() && cmd.matches("[0-9]:[0-9]")) {
-            int checkUserStep = gameService.checkUserStep(cmd, user);
+            int checkUserStep = gameService.setUserStep(cmd, user);
             if(checkUserStep == 1) {
+                //попадание user
                 User usr = userService.findOrSaveUser(update);
                 user.setOpponentGameFiled(usr.getOpponentGameFiled());
                 editMessageText.setText(gameMessageService
@@ -77,6 +78,7 @@ public class InGameServiceImpl implements InGameService {
                 }
             }
             else if(checkUserStep == 0) {
+                //промах user
                 User usr = userService.findOrSaveUser(update);
                 user.setActive(false);
                 user.setOpponentGameFiled(usr.getOpponentGameFiled());
@@ -92,15 +94,17 @@ public class InGameServiceImpl implements InGameService {
                 }
             }
             else {
+                //победа user
+                endGameController.endGameOpponent(user.getOpponentId());
                 user.setState(ONLINE);
                 user.setActive(false);
                 user.setOpponentId(0L);
                 user.setUserGameFiled(new ArrayList<>());
                 user.setOpponentGameFiled(new ArrayList<>());
+                user.setCountVictory(user.getCountVictory() + 1);
                 editMessageText.setText("Победа!\nВыберите действие, " + user.getName());
                 editMessageText.setReplyMarkup(InlineButton.changeOptions());
                 user.setEditMessageText(editMessageText);
-                endGameController.endGameOpponent(user.getOpponentId());
             }
         }
         else if(!user.isActive()) {

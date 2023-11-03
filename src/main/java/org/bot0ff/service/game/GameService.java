@@ -16,7 +16,7 @@ public class GameService {
     private final GameFiledService gameFiledService;
 
     //проверяет попадание user
-    public int checkUserStep(String userTarget, User user) {
+    public int setUserStep(String userTarget, User user) {
         int result;
         String[] split = userTarget.split(":");
         int[][] opponentGameFiled = gameFiledService.convertListFiledToArr(user.getOpponentGameFiled());

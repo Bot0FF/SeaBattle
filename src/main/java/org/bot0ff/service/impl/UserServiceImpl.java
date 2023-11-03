@@ -36,13 +36,15 @@ public class UserServiceImpl implements UserService {
         if(persistentUser == null) {
             User newUser = User.builder()
                     .id(telegramUser.getId())
-                    .name(telegramUser.getUserName())
+                    .name(telegramUser.getFirstName())
                     .registerDate(LocalDateTime.now())
                     .state(UserState.WAIT_REGISTRATION)
                     .userGameFiled(new ArrayList<>())
                     .opponentGameFiled(new ArrayList<>())
                     .opponentId(0L)
                     .isActive(false)
+                    .countVictory(0)
+                    .countLoss(0)
                     .build();
             return userRepository.save(newUser);
         }
