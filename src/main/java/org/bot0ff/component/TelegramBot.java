@@ -4,11 +4,8 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j;
 import org.bot0ff.component.button.TextButton;
-import org.bot0ff.controller.EndGameController;
-import org.bot0ff.controller.JoinUserController;
-import org.bot0ff.controller.UpdateController;
+import org.bot0ff.controller.*;
 import org.bot0ff.dto.ResponseDto;
-import org.bot0ff.controller.UserAiController;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
@@ -31,6 +28,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     private final UserAiController userAiController;
     private final EndGameController endGameController;
     private final JoinUserController joinUserController;
+    private final UserUserController userUserController;
 
     @PostConstruct
     private void init() {
@@ -38,6 +36,8 @@ public class TelegramBot extends TelegramLongPollingBot {
         userAiController.registerBot(this);
         endGameController.registerBot(this);
         joinUserController.registerBot(this);
+        userUserController.registerBot(this);
+
         try {
             this.execute(new SetMyCommands(TextButton.commandMarkup(), new BotCommandScopeDefault(), null));
         } catch (TelegramApiException e) {

@@ -39,8 +39,10 @@ public class EndGameController {
                 TimeUnit.SECONDS.sleep(1);
                 var editMessageText = new EditMessageText();
                 editMessageText.setChatId(opponent.getId());
+                editMessageText.setMessageId(opponent.getMessageId());
                 opponent.setState(ONLINE);
                 opponent.setActive(false);
+                opponent.setOpponentId(0L);
                 opponent.setUserGameFiled(new ArrayList<>());
                 opponent.setOpponentGameFiled(new ArrayList<>());
                 userService.saveUser(opponent);

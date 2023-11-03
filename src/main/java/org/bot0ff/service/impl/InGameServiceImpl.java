@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j;
 import org.bot0ff.component.button.InlineButton;
 import org.bot0ff.controller.EndGameController;
+import org.bot0ff.controller.UserUserController;
 import org.bot0ff.entity.User;
 import org.bot0ff.service.InGameService;
 import org.bot0ff.service.UserService;
@@ -32,6 +33,7 @@ public class InGameServiceImpl implements InGameService {
     private final GameMessageService gameMessageService;
     private final GameFiledService gameFiledService;
     private final UserAiController userAiController;
+    private final UserUserController userUserController;
     private final EndGameController endGameController;
 
     //ответы на текстовые запросы
@@ -70,6 +72,9 @@ public class InGameServiceImpl implements InGameService {
                         .getCurrentGameFiled("Попадание. Вы продолжаете...", gameFiledService.convertListFiledToArr(user.getUserGameFiled())));
                 editMessageText.setReplyMarkup(InlineButton.gameBoard(user.getOpponentGameFiled()));
                 user.setEditMessageText(editMessageText);
+                if(!user.getOpponentId().equals(0L)) {
+                    userUserController.userUserActionHit(update, editMessageText, user);
+                }
             }
             else if(checkUserStep == 0) {
                 User usr = userService.findOrSaveUser(update);
@@ -79,7 +84,12 @@ public class InGameServiceImpl implements InGameService {
                         .getCurrentGameFiled("Промах. Ход противника...", gameFiledService.convertListFiledToArr(user.getUserGameFiled())));
                 editMessageText.setReplyMarkup(InlineButton.gameBoard(user.getOpponentGameFiled()));
                 user.setEditMessageText(editMessageText);
-                userAiController.userAiAction(update, editMessageText, user);
+                if(!user.getOpponentId().equals(0L)) {
+                    userUserController.userUserActionMiss(update, editMessageText, user);
+                }
+                else {
+                    userAiController.userAiAction(update, editMessageText, user);
+                }
             }
             else {
                 user.setState(ONLINE);

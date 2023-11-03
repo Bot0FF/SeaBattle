@@ -20,13 +20,13 @@ import static org.bot0ff.service.ServiceCommands.CANCEL;
 public class SearchGameServiceImpl implements SearchGameService {
     @Override
     public User searchGameText(User user, SendMessage sendMessage, String cmd) {
-        if(CANCEL.equals(cmd)) {
-            user.setState(ONLINE);
-            JoinUserController.removeUserFromMap(user);
-            sendMessage.setText("Сброс настроек игры...\nВыберите действие, " + user.getName());
-            sendMessage.setReplyMarkup(InlineButton.changeOptions());
-            user.setSendMessage(sendMessage);
-        }
+//        if(CANCEL.equals(cmd)) {
+//            user.setState(ONLINE);
+//            JoinUserController.removeUserFromMap(user);
+//            sendMessage.setText("Сброс настроек игры...\nВыберите действие, " + user.getName());
+//            sendMessage.setReplyMarkup(InlineButton.changeOptions());
+//            user.setSendMessage(sendMessage);
+//        }
         return user;
     }
 

@@ -65,6 +65,8 @@ public class PrepareGameServiceImpl implements PrepareGameService {
         }
         else if(cmd.equals("/searchGameVsUser")) {
             if(gameFiledService.checkPreparedShips(GameFiledService.prepareUserFiledMap.get(user.getId()))) {
+                var userGameFiled = GameFiledService.prepareUserFiledMap.get(user.getId());
+                user.setUserGameFiled(gameFiledService.convertArrFiledToList(userGameFiled));
                 user.setState(SEARCH_GAME);
                 JoinUserController.joinUserMap.put(user.getId(), user);
                 editMessageText.setText("Поиск противника...");
