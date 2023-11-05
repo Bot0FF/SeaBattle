@@ -67,7 +67,7 @@ public class ActivityServiceImpl implements ActivityService {
                     "\nТрехпалубный - 2" +
                     "\nДвухпалубный - 3" +
                     "\nОднопалубный - 4" +
-                    "Удачного сражения!");
+                    "\nУдачного сражения!");
             editMessageText.setReplyMarkup(InlineButton.mainPageButton());
             user.setEditMessageText(editMessageText);
         }
