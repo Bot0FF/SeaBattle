@@ -56,7 +56,7 @@ public class ActivityServiceImpl implements ActivityService {
         }
         //TODO сделать помощь
         else if(cmd.equals("/help")) {
-            editMessageText.setText("Помощь по игре" +
+            editMessageText.setText(
                     "Игра \"Морской бой\" представляет из себя пошаговое сражение, " +
                     "где у каждого игрока есть свое поле с расставленными кораблями. " +
                     "Задача каждого игрока - потопить все корабли противника, " +
