@@ -35,8 +35,7 @@ public class JoinUserController {
     //фоновый процесс настройки игры между двумя users, которые в статусе SEARCH_GAME
     @Scheduled(fixedDelay = 5000)
     private void setUserVsUserGame() {
-        System.out.println(joinUserMap.size());
-        while (joinUserMap.size() > 1 && joinUserMap.size() % 2 == 0){
+        while (joinUserMap.size() > 1){
             var editMessageTextForOne = new EditMessageText();
             var editMessageTextForTwo = new EditMessageText();
 
@@ -45,6 +44,7 @@ public class JoinUserController {
             Long userIdTwo = randomKey.get(getRNum(randomKey.size()));
             User userOne = joinUserMap.get(userIdOne);
             User userTwo = joinUserMap.get(userIdTwo);
+            if(userIdOne.equals(userIdTwo)) continue;
             if(userOne != null && userTwo != null
                     && userOne.getState().equals(SEARCH_GAME)
                     && userTwo.getState().equals(SEARCH_GAME)) {

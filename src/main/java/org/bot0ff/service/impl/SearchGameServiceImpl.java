@@ -11,6 +11,8 @@ import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 
+import java.util.ArrayList;
+
 import static org.bot0ff.entity.UserState.ONLINE;
 import static org.bot0ff.service.ServiceCommands.CANCEL;
 
@@ -22,6 +24,10 @@ public class SearchGameServiceImpl implements SearchGameService {
     public User searchGameText(User user, SendMessage sendMessage, String cmd) {
         if(CANCEL.equals(cmd)) {
             user.setState(ONLINE);
+            user.setActive(false);
+            user.setOpponentId(0L);
+            user.setUserGameFiled(new ArrayList<>());
+            user.setOpponentGameFiled(new ArrayList<>());
             JoinUserController.removeUserFromMap(user);
             sendMessage.setText("Сброс настроек игры...\nВыберите действие, " + user.getName());
             sendMessage.setReplyMarkup(InlineButton.changeOptions());
