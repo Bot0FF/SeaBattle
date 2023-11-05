@@ -33,29 +33,14 @@ public class JoinUserController {
     }
 
     //фоновый процесс настройки игры между двумя users, которые в статусе SEARCH_GAME
-    @Scheduled(fixedDelay = 3000)
+    @Scheduled(fixedDelay = 5000)
     private void setUserVsUserGame() {
-        var editMessageTextForOne = new EditMessageText();
-        var editMessageTextForTwo = new EditMessageText();
-        List<Long> randomKey = new ArrayList<>(joinUserMap.keySet());
-        if(!joinUserMap.isEmpty() && randomKey.size() < 2) {
-            Long userIdOne = randomKey.get(getRNum(randomKey.size()));
-            User userOne = joinUserMap.get(userIdOne);
-            userOne.setState(PREPARE_GAME);
-            userOne.setActive(false);
-            editMessageTextForOne.setChatId(userIdOne);
-            editMessageTextForOne.setMessageId(userOne.getMessageId());
-            editMessageTextForOne.setText("Противник не найден...");
-            editMessageTextForOne.setReplyMarkup(InlineButton.setManuallyPrepareShip(userOne));
-            userService.saveUser(userOne);
-            removeUserFromMap(userOne);
-            var response = ResponseDto.builder()
-                    .telegramBot(telegramBot)
-                    .editMessageText(editMessageTextForOne)
-                    .build();
-            telegramBot.sendAnswer(response);
-        }
-        else if(joinUserMap.size() > 1){
+        System.out.println(joinUserMap.size());
+        while (joinUserMap.size() > 1 && joinUserMap.size() % 2 == 0){
+            var editMessageTextForOne = new EditMessageText();
+            var editMessageTextForTwo = new EditMessageText();
+
+            List<Long> randomKey = new ArrayList<>(joinUserMap.keySet());
             Long userIdOne = randomKey.get(getRNum(randomKey.size()));
             Long userIdTwo = randomKey.get(getRNum(randomKey.size()));
             User userOne = joinUserMap.get(userIdOne);

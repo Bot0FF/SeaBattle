@@ -69,7 +69,7 @@ public class PrepareGameServiceImpl implements PrepareGameService {
                 user.setUserGameFiled(gameFiledService.convertArrFiledToList(userGameFiled));
                 user.setState(SEARCH_GAME);
                 JoinUserController.joinUserMap.put(user.getId(), user);
-                editMessageText.setText("Поиск противника...");
+                editMessageText.setText("Поиск противника... \nДля отмены выберите в Меню \"Завершить игру\"");
                 user.setEditMessageText(editMessageText);
             }
             else {

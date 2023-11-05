@@ -52,8 +52,14 @@ public class InGameServiceImpl implements InGameService {
             user.setSendMessage(sendMessage);
         }
         else if(CANCEL.equals(cmd)) {
+            endGameController.endGameOpponent(true, user.getOpponentId());
             user.setState(ONLINE);
-            sendMessage.setText("Сброс настроек игры...\nВыберите действие, " + user.getName());
+            user.setActive(false);
+            user.setOpponentId(0L);
+            user.setUserGameFiled(new ArrayList<>());
+            user.setOpponentGameFiled(new ArrayList<>());
+            user.setCountLoss(user.getCountLoss() + 1);
+            sendMessage.setText("Поражение...\nВыберите действие, " + user.getName());
             sendMessage.setReplyMarkup(InlineButton.changeOptions());
             user.setSendMessage(sendMessage);
         }
@@ -95,7 +101,7 @@ public class InGameServiceImpl implements InGameService {
             }
             else {
                 //победа user
-                endGameController.endGameOpponent(user.getOpponentId());
+                endGameController.endGameOpponent(false, user.getOpponentId());
                 user.setState(ONLINE);
                 user.setActive(false);
                 user.setOpponentId(0L);

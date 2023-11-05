@@ -30,7 +30,7 @@ public class EndGameController {
     }
 
     //сбрасывает настройки user и отправляет главную страницу в случае поражения
-    public void endGameOpponent(Long opponentId) {
+    public void endGameOpponent(boolean status, Long opponentId) {
         EXECUTOR_SERVICE.execute(() -> {
             try {
                 User opponent = userService.findById(opponentId).orElse(null);
@@ -45,10 +45,16 @@ public class EndGameController {
                 opponent.setOpponentId(0L);
                 opponent.setUserGameFiled(new ArrayList<>());
                 opponent.setOpponentGameFiled(new ArrayList<>());
-                opponent.setCountLoss(opponent.getCountLoss() + 1);
-                userService.saveUser(opponent);
-                editMessageText.setText("Поражение...\nВыберите действие, " + opponent.getName());
+                if(status) {
+                    opponent.setCountVictory(opponent.getCountVictory() + 1);
+                    editMessageText.setText("Победа! Противник сдался...\nВыберите действие, " + opponent.getName());
+                }
+                else {
+                    opponent.setCountLoss(opponent.getCountLoss() + 1);
+                    editMessageText.setText("Поражение...\nВыберите действие, " + opponent.getName());
+                }
                 editMessageText.setReplyMarkup(InlineButton.changeOptions());
+                userService.saveUser(opponent);
                 var response = ResponseDto.builder()
                         .telegramBot(telegramBot)
                         .editMessageText(editMessageText)

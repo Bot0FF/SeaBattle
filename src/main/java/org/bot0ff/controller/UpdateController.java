@@ -40,12 +40,12 @@ public class UpdateController {
 
     private void processTextMessage(TelegramBot telegramBot, Update update) {
         mainService.processTextMessage(telegramBot, update);
-        System.out.println(update.getMessage().getText());
+        //System.out.println(update.getMessage().getText());
     }
 
     private void processCallbackQuery(TelegramBot telegramBot, Update update) {
         mainService.processCallbackQuery(telegramBot, update);
-        System.out.println(update.getCallbackQuery().getData());
+        //System.out.println(update.getCallbackQuery().getData());
     }
 
     private void setUnsupportedMessageType(Update update) {
